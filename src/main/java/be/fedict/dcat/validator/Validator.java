@@ -22,14 +22,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package be.fedict.dcat.validator;
 
+import org.openrdf.sail.inferencer.fc.DedupingInferencer;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
+import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.spin.SpinSail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Test runner for recommended properties and classes.
+ * A validator .
  * 
  * @author Bart Hanssens <bart.hanssens@fedict.be>
  */
-public class Recommended {
+public class Validator {
+    private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
+    public Validator() {
+        SpinSail spinSail = new SpinSail();
+        spinSail.setBaseSail(new ForwardChainingRDFSInferencer(
+                new DedupingInferencer(new MemoryStore()))
+        );
+    }
 }

@@ -28,6 +28,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -44,11 +45,43 @@ public class Main {
     private static final Options OPTS = new Options();
     
     static {
-        OPTS.addOption("i", "input", true, "Input URL");
-        OPTS.addOption("o", "output", true, "Report output");
-        OPTS.addOption("m", "mandatory", false, "Check mandatory properties");
-        OPTS.addOption("r", "recommended", false, "Check recommended properties");
-        OPTS.addOption("h", "help", false, "Print this help text");
+        OPTS.addOption(Option.builder("i").longOpt("in")
+                            .desc("Input file or URL")
+                            .required().hasArg().build());
+        OPTS.addOption(Option.builder("o").longOpt("out")
+                            .desc("Report output file")
+                            .hasArg().build());
+        OPTS.addOption(Option.builder("r").longOpt("recommended")
+                            .desc("Also check recommended (= non-mandatory) checks")
+                            .build());
+        OPTS.addOption(Option.builder("h").longOpt("help")
+                            .desc("Print this help text")
+                            .build());
+    }
+    
+    /**
+     * Parse command line arguments
+     * 
+     * @param args arguments
+     * @return parsed command line or null
+     */
+    private static CommandLine parseArgs(String[] args) {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
+        try {
+            cmd = parser.parse(OPTS, args);    
+        } catch (ParseException ex) {
+            LOG.error("Error parsing command line {}", ex.getMessage());
+        }
+        return cmd;
+    }
+    
+    /**
+     * Print help
+     */
+    private static void printHelp() {
+        HelpFormatter help = new HelpFormatter();
+        help.printHelp("Validator", "DCAT-AP 1.1 validator", OPTS, null);
     }
     
     /**
@@ -57,16 +90,14 @@ public class Main {
      * @param args 
      */
     public static void main(String[] args) {
-        CommandLineParser parser = new DefaultParser();
-        try {
-            CommandLine cmd = parser.parse(OPTS, args);
-            
-        } catch (ParseException ex) {
-            LOG.error("Error parsing command line" + ex.getMessage());
-            HelpFormatter help = new HelpFormatter();
-            help.printHelp("Validator", "DCAT-AP 1.1 validator", OPTS, null);
+        CommandLine cmd = parseArgs(args);
+        if (cmd == null || cmd.hasOption('h')) {
+            printHelp();
             System.exit(-1);
         }
+        
+        String infile = cmd.getOptionValue('i');
+        
         System.exit(0);
     }
 }
