@@ -24,6 +24,8 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -47,12 +49,16 @@ public class Main {
     static {
         OPTS.addOption(Option.builder("i").longOpt("in")
                             .desc("Input file or URL")
-                            .required().hasArg().build());
+                            .hasArg().build());
         OPTS.addOption(Option.builder("o").longOpt("out")
                             .desc("Report output file")
                             .hasArg().build());
-        OPTS.addOption(Option.builder("r").longOpt("recommended")
-                            .desc("Also check recommended (= non-mandatory) checks")
+        OPTS.addOption(Option.builder("r").longOpt("rulesets")
+                            .desc("Use one or more rulesets")
+                            .hasArg().hasArgs()
+                            .build());
+        OPTS.addOption(Option.builder("s").longOpt("statistics")
+                            .desc("Run statistics")
                             .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
@@ -91,12 +97,39 @@ public class Main {
      */
     public static void main(String[] args) {
         CommandLine cmd = parseArgs(args);
+        
         if (cmd == null || cmd.hasOption('h')) {
             printHelp();
             System.exit(-1);
         }
         
         String infile = cmd.getOptionValue('i');
+        if (infile == null || infile.isEmpty()) {
+            LOG.error("Missing input file or URL");
+            printHelp();
+            System.exit(-2);
+        }
+        
+        String outfile = cmd.getOptionValue('o');
+        if (outfile == null || outfile.isEmpty()) {
+            LOG.warn("Missing output file");
+        }
+        
+        String[] rules = cmd.getOptionValues('r');
+        if (rules == null || rules.length == 0) {
+            LOG.warn("No ruleset specified");
+        }
+        
+        boolean stats = cmd.hasOption('s');
+        
+        Validator validator = new Validator(infile, outfile);
+        
+        try {
+            validator.validate(rules, stats);
+        } catch (IOException ex) {
+            LOG.error("Validation failed {}", ex.getMessage());
+            System.exit(-3);
+        }
         
         System.exit(0);
     }

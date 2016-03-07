@@ -76,4 +76,5 @@
             </plugin>
         </plugins>
     </build>
+    <name>validator</name>
 </project>

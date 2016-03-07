@@ -24,6 +24,19 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.DedupingInferencer;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
@@ -39,10 +52,87 @@ import org.slf4j.LoggerFactory;
 public class Validator {
     private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
-    public Validator() {
-        SpinSail spinSail = new SpinSail();
-        spinSail.setBaseSail(new ForwardChainingRDFSInferencer(
-                new DedupingInferencer(new MemoryStore()))
-        );
+    private final String infile;
+    private final String outfile;
+    private Repository repo;
+        
+    
+    /**
+     * Enumerate resources
+     * 
+     * @param res
+     * @return 
+     */
+    private File[] enumerateRes(String res) throws IOException {
+        File[] files = new File[0];
+        
+        Enumeration<URL> urls = ClassLoader.getSystemResources(res);
+        if (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            File root;
+            try {
+                root = new File(url.toURI());
+                files = root.listFiles();
+            } catch (URISyntaxException ex) {
+                LOG.error("Could not load resources from {}", url);
+                LOG.debug(ex.getMessage());
+            }
+        }
+        return files;
+    }
+    
+    /**
+     * Get a Sesame SAIL
+     * 
+     * @return
+     * @throws IOException 
+     */
+    private Sail getSail() throws IOException {
+        File tmp = File.createTempFile("sail", null);
+        
+        LOG.debug("Creating sail usingg temfile {}", tmp);
+        
+        MemoryStore mem = new MemoryStore(tmp);
+        mem.setPersist(false);
+        
+        SpinSail sail = new SpinSail();
+        sail.setBaseSail(new ForwardChainingRDFSInferencer(
+                            new DedupingInferencer(mem)));
+        return sail;
+    }
+    
+    /**
+     * Validates
+     *
+     * @param rules rulesets to validate
+     * @param stats  create stats
+     * @throws IOException 
+     */
+    public void validate(String[] rules, boolean stats) throws IOException {
+        File inf = new File(this.infile);
+        
+        repo = new SailRepository(getSail());
+       
+        try (InputStream is = new BufferedInputStream(new FileInputStream(inf))) {
+            LOG.info("Reading data from {}", inf);
+            repo.getConnection().add(is, "http://data.gov.be", null);
+        }
+        
+        if (stats) {
+            enumerateRes("stats");
+        }
+        
+        repo.shutDown();
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param in
+     * @param out
+     */
+    public Validator(String in, String out) {
+        this.infile = in;
+        this.outfile = out;
     }
 }
