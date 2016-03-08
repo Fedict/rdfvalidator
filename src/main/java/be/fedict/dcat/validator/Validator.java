@@ -31,11 +31,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Enumeration;
-import java.util.logging.Level;
+import java.util.List;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
 import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.DedupingInferencer;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
@@ -55,8 +60,7 @@ public class Validator {
     private final String infile;
     private final String outfile;
     private Repository repo;
-        
-    
+
     /**
      * Enumerate resources
      * 
@@ -102,6 +106,26 @@ public class Validator {
     }
     
     /**
+     * Evaluate statistics
+     * 
+     * @throws IOException 
+     */
+    private void evaluateStats() throws IOException {
+        File[] files = enumerateRes("stats");
+        for (File f: files) {
+            String q = new String(Files.readAllBytes(Paths.get(f.toURI())));
+            LOG.info("Loading query {}", q);
+            TupleQuery query = repo.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, q);
+            TupleQueryResult res = query.evaluate();
+            List<String> cols = res.getBindingNames();
+            while(res.hasNext()) {
+                BindingSet row = res.next();
+                row.iterator()
+            }
+        }
+    }
+    
+    /**
      * Validates
      *
      * @param rules rulesets to validate
@@ -119,7 +143,9 @@ public class Validator {
         }
         
         if (stats) {
-            enumerateRes("stats");
+            evaluateStats();
+            
+            
         }
         
         repo.shutDown();
