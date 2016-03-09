@@ -24,15 +24,14 @@
  */
 package be.fedict.dcat.validator;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import org.openrdf.query.BindingSet;
@@ -57,10 +56,14 @@ import org.slf4j.LoggerFactory;
 public class Validator {
     private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
-    private final String infile;
-    private final String outfile;
+    public final static String RULES_STATS = "stats";
+    public final static String BASE_URI = "http://data.gov.be";
+    
+    private final InputStream is;
+    private final SimpleResultWriter sw;
+    
     private Repository repo;
-
+    
     /**
      * Enumerate resources
      * 
@@ -73,9 +76,8 @@ public class Validator {
         Enumeration<URL> urls = ClassLoader.getSystemResources(res);
         if (urls.hasMoreElements()) {
             URL url = urls.nextElement();
-            File root;
             try {
-                root = new File(url.toURI());
+                File root = new File(url.toURI());
                 files = root.listFiles();
             } catch (URISyntaxException ex) {
                 LOG.error("Could not load resources from {}", url);
@@ -105,47 +107,72 @@ public class Validator {
         return sail;
     }
     
+    
     /**
-     * Evaluate statistics
+     * Run a query
      * 
+     * @param q query
+     */
+    private void runQuery(String q) throws IOException {
+        TupleQuery query = repo.getConnection()
+                                   .prepareTupleQuery(QueryLanguage.SPARQL, q);
+            
+        try (TupleQueryResult res = query.evaluate()) {
+            sw.startTable(q);
+            
+            List<String> cols = res.getBindingNames();
+            sw.columnNames(cols);
+            
+            int i = 0;
+            while(res.hasNext()) {
+                List<String> row = new ArrayList<>();
+                
+                BindingSet bset = res.next();
+                bset.iterator().forEachRemaining(cell -> 
+                                        row.add(cell.getValue().stringValue()));
+                sw.row(row);
+                i++;
+            }
+            LOG.debug("Query had {} results", i);
+            sw.endTable();
+        }
+
+    }
+            
+    /**
+     * Run the ruleset
+     * 
+     * @param rules name of the ruleset
      * @throws IOException 
      */
-    private void evaluateStats() throws IOException {
-        File[] files = enumerateRes("stats");
+    private void runRuleset(String rules) throws IOException {
+        File[] files = enumerateRes(rules);
+        
         for (File f: files) {
             String q = new String(Files.readAllBytes(Paths.get(f.toURI())));
-            LOG.info("Loading query {}", q);
-            TupleQuery query = repo.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, q);
-            TupleQueryResult res = query.evaluate();
-            List<String> cols = res.getBindingNames();
-            while(res.hasNext()) {
-                BindingSet row = res.next();
-                row.iterator()
-            }
+            LOG.info("Loaded query {}", q);
+            
+            runQuery(q);
         }
     }
     
     /**
-     * Validates
+     * Validates RDF triples from input stream against rulesets
      *
-     * @param rules rulesets to validate
-     * @param stats  create stats
+     * @param rulesets ruleset(s) to validate
+     * @param stats also create statistics
      * @throws IOException 
      */
-    public void validate(String[] rules, boolean stats) throws IOException {
-        File inf = new File(this.infile);
-        
+    public void validate(String[] rulesets, boolean stats) throws IOException {
         repo = new SailRepository(getSail());
-       
-        try (InputStream is = new BufferedInputStream(new FileInputStream(inf))) {
-            LOG.info("Reading data from {}", inf);
-            repo.getConnection().add(is, "http://data.gov.be", null);
+        repo.getConnection().add(is, BASE_URI, null);
+
+        for(String ruleset: rulesets) {
+            runRuleset(ruleset);
         }
         
         if (stats) {
-            evaluateStats();
-            
-            
+            runRuleset(RULES_STATS);
         }
         
         repo.shutDown();
@@ -154,11 +181,11 @@ public class Validator {
     /**
      * Constructor
      * 
-     * @param in
-     * @param out
+     * @param is inputstream
+     * @param sw simple result writer
      */
-    public Validator(String in, String out) {
-        this.infile = in;
-        this.outfile = out;
+    public Validator(InputStream is, SimpleResultWriter sw) {
+        this.is = is;
+        this.sw = sw;
     }
 }

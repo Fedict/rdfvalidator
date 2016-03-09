@@ -24,8 +24,15 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -74,6 +81,7 @@ public class Main {
     private static CommandLine parseArgs(String[] args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
+        
         try {
             cmd = parser.parse(OPTS, args);    
         } catch (ParseException ex) {
@@ -121,11 +129,22 @@ public class Main {
         }
         
         boolean stats = cmd.hasOption('s');
+
+        LOG.info("Reading data from {}, writing to {}", infile, outfile);
         
-        Validator validator = new Validator(infile, outfile);
-        
-        try {
+        try(InputStream is = new BufferedInputStream(new FileInputStream(infile));
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile))) {
+            
+            HtmlWriter w = new HtmlWriter(os);
+            
+            w.start();
+            w.text("File to validate: " + infile);
+            w.text("Current time: " + new Date());
+            
+            Validator validator = new Validator(is, w);
             validator.validate(rules, stats);
+            
+            w.end();
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-3);
