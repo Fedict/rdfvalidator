@@ -138,6 +138,13 @@ public class HtmlWriter implements SimpleResultWriter {
         out.flush();
     }
     
+    /**
+     * Print simple text
+     * 
+     * @param text
+     * @throws IOException 
+     */
+    @Override
     public void text(String text) throws IOException {
         writeln("<p>" + text + "</p>");
     }

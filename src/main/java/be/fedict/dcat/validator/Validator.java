@@ -161,9 +161,13 @@ public class Validator {
      *
      * @param rulesets ruleset(s) to validate
      * @param stats also create statistics
+     * @return true if valid
      * @throws IOException 
      */
-    public void validate(String[] rulesets, boolean stats) throws IOException {
+    public boolean validate(String[] rulesets, boolean stats) throws IOException {
+        boolean valid = false;
+        
+        LOG.debug("Initialize repository");
         repo = new SailRepository(getSail());
         repo.getConnection().add(is, BASE_URI, null);
 
@@ -175,7 +179,10 @@ public class Validator {
             runRuleset(RULES_STATS);
         }
         
+        LOG.debug("Shutdown repository");
         repo.shutDown();
+        
+        return valid;
     }
     
     /**
