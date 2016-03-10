@@ -169,6 +169,7 @@ public class Validator {
         
         LOG.debug("Initialize repository");
         repo = new SailRepository(getSail());
+        repo.initialize();
         repo.getConnection().add(is, BASE_URI, null);
 
         for(String ruleset: rulesets) {

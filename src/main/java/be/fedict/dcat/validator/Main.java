@@ -31,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Calendar;
 import java.util.Date;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -121,6 +120,8 @@ public class Main {
         String outfile = cmd.getOptionValue('o');
         if (outfile == null || outfile.isEmpty()) {
             LOG.warn("Missing output file");
+            printHelp();
+            System.exit(-2);
         }
         
         String[] rules = cmd.getOptionValues('r');
