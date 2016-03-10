@@ -23,6 +23,7 @@
             <transformer>
               <mainClass>be.fedict.dcat.validator.Main</mainClass>
             </transformer>
+            <transformer />
           </transformers>
         </configuration>
       </plugin>

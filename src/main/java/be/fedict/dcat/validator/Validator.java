@@ -40,6 +40,7 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.DedupingInferencer;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
@@ -96,14 +97,14 @@ public class Validator {
     private Sail getSail() throws IOException {
         File tmp = File.createTempFile("sail", null);
         
-        LOG.debug("Creating sail usingg temfile {}", tmp);
+        LOG.debug("Creating sail using tempfile {}", tmp);
         
-        MemoryStore mem = new MemoryStore(tmp);
-        mem.setPersist(false);
+       // MemoryStore mem = new MemoryStore(tmp);
+        //mem.setPersist(false);
         
         SpinSail sail = new SpinSail();
         sail.setBaseSail(new ForwardChainingRDFSInferencer(
-                            new DedupingInferencer(mem)));
+                              new DedupingInferencer(new MemoryStore())));
         return sail;
     }
     
@@ -170,8 +171,16 @@ public class Validator {
         LOG.debug("Initialize repository");
         repo = new SailRepository(getSail());
         repo.initialize();
-        repo.getConnection().add(is, BASE_URI, null);
-
+        
+        LOG.debug("Adding triples");
+        repo.getConnection().add(is, BASE_URI, RDFFormat.NTRIPLES);
+        
+        if(repo.getConnection().isEmpty()) {
+            LOG.error("No statements loaded");
+            repo.shutDown();
+            return false;
+        }
+        
         for(String ruleset: rulesets) {
             runRuleset(ruleset);
         }

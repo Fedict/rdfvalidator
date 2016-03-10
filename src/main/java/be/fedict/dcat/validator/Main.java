@@ -127,6 +127,7 @@ public class Main {
         String[] rules = cmd.getOptionValues('r');
         if (rules == null || rules.length == 0) {
             LOG.warn("No ruleset specified");
+            rules = new String[0];
         }
         
         boolean stats = cmd.hasOption('s');
