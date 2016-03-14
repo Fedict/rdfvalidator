@@ -86,7 +86,8 @@ public class HtmlWriter implements SimpleResultWriter {
         StringBuilder sb = new StringBuilder();
         sb.append("<tr>");
         for(String cell: cells) {
-            sb.append(tag).append(cell).append(tag);
+            sb.append("<").append(tag).append(">").append(cell)
+                    .append("</").append(tag).append(">");
         }
         sb.append("</tr>");
         writeln(sb.toString());
@@ -157,7 +158,7 @@ public class HtmlWriter implements SimpleResultWriter {
     @Override
     public void start() throws IOException {
         writeln("<html>");
-        writeln("<head><title>DCAT Validator Report</head>");
+        writeln("<head><title>DCAT Validator Report</title></head>");
         writeln("<body>");
         out.flush();
     }

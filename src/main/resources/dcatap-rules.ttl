@@ -1,0 +1,24 @@
+@prefix spin:	<http://spinrdf.org/spin#> . 
+@prefix sp:		<http://spinrdf.org/sp#> .
+@prefix spl: 	<http://spinrdf.org/spl#> .
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat:	<http://www.w3.org/ns/dcat#> .
+@prefix dcterms:	<http://purl.org/dc/elements/1.1/> .
+
+dcat:Catalog
+    spin:constraint [
+	a sp:Construct ;
+        sp:text """
+            CONSTRUCT {
+                _:violation a spin:ConstraintValidation ;
+                        spin:validationRoot ?this ;
+			spin:validationPath dcterms:license ;
+			rdfs:label "Catalog {?this} must have a license"
+            }
+            WHERE {
+                FILTER (NOT EXISTS {?this dcterms:license ?lic })
+            }
+        """
+    ] .
+

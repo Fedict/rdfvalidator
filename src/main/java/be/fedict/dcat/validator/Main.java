@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,6 +40,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,18 +56,15 @@ public class Main {
     private static final Options OPTS = new Options();
     
     static {
-        OPTS.addOption(Option.builder("i").longOpt("in")
+        OPTS.addOption(Option.builder("i").longOpt("input")
                             .desc("Input file or URL")
                             .hasArg().build());
-        OPTS.addOption(Option.builder("o").longOpt("out")
+        OPTS.addOption(Option.builder("o").longOpt("output")
                             .desc("Report output file")
                             .hasArg().build());
-        OPTS.addOption(Option.builder("r").longOpt("rulesets")
-                            .desc("Use one or more rulesets")
+        OPTS.addOption(Option.builder("r").longOpt("ruleset")
+                            .desc("Use ruleset file(s) instead of built-in rules")
                             .hasArg().hasArgs()
-                            .build());
-        OPTS.addOption(Option.builder("s").longOpt("statistics")
-                            .desc("Run statistics")
                             .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
@@ -119,7 +119,7 @@ public class Main {
         
         String outfile = cmd.getOptionValue('o');
         if (outfile == null || outfile.isEmpty()) {
-            LOG.warn("Missing output file");
+            LOG.error("Missing output file");
             printHelp();
             System.exit(-2);
         }
@@ -130,23 +130,25 @@ public class Main {
             rules = new String[0];
         }
         
-        boolean stats = cmd.hasOption('s');
-
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
+        
+        Optional<RDFFormat> fmt = Rio.getParserFormatForFileName(infile);
+        if (!fmt.isPresent()) {
+            LOG.error("Could not determine file type of {}", infile);
+            System.exit(-3);
+        }
         
         try(InputStream is = new BufferedInputStream(new FileInputStream(infile));
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile))) {
-            
-            HtmlWriter w = new HtmlWriter(os);
-            
+            /*
             w.start();
             w.text("File to validate: " + infile);
             w.text("Current time: " + new Date());
+            */
+            Validator validator = new Validator(is, fmt.get(), os);
+            validator.validate(rules);
             
-            Validator validator = new Validator(is, w);
-            validator.validate(rules, stats);
-            
-            w.end();
+            //w.end();
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-3);

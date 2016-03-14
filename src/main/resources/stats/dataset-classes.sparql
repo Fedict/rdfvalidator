@@ -1,3 +1,0 @@
-SELECT ?class COUNT(?class)
-WHERE { ?s a ?class }
-GROUP BY ?class
