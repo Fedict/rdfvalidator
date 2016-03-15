@@ -30,11 +30,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
-import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.DedupingInferencer;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
@@ -68,7 +68,7 @@ public class Validator {
      * @return
      * @throws IOException 
      */
-    private Sail getSail() throws IOException {
+    private SpinSail getSail() throws IOException {
         LOG.debug("Creating sail");
         
         SpinSail sail = new SpinSail();
@@ -94,7 +94,7 @@ public class Validator {
         }
         
         // Run built-in ruleset if none specified
-        if( rulesets.length == 0) {
+        if (rulesets.length == 0) {
             LOG.info("No rulesets specified, run built-in set");
             InputStream r = ClassLoader.getSystemResourceAsStream("dcatap-rules.ttl");
             con.add(r, BASE_URI, RDFFormat.TURTLE);
@@ -114,20 +114,29 @@ public class Validator {
         LOG.debug("Initialize repository");
         repo = new SailRepository(getSail());
         repo.initialize();
-        
+ 
+        loadRulesets(rulesets);
+               
         LOG.info("Adding triples");
         
         w = Rio.createWriter(RDFFormat.TURTLE, this.os);
+    
+        try {
+            repo.getConnection().add(is, BASE_URI, this.fmt);
+        } catch (RepositoryException cve) {
+            LOG.error("Oeps");
+        }
         
-        loadRulesets(rulesets);
-
-        repo.getConnection().add(is, BASE_URI, this.fmt);
         if(repo.getConnection().isEmpty()) {
             LOG.error("No statements loaded");
             repo.shutDown();
             return false;
         }
-           
+    
+        repo.getConnection().export(w);
+        
+        repo.getConnection().close();
+        
         LOG.debug("Shutdown repository");
         repo.shutDown();
         

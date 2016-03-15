@@ -18,17 +18,7 @@
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-rio-turtle</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-rio-ntriples</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-rio-rdfxml</artifactId>
+            <artifactId>sesame-sail-inferencer</artifactId>
             <version>4.1.1</version>
         </dependency>
         <dependency>
@@ -40,37 +30,6 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sail-memory</artifactId>
             <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sail-nativerdf</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-spin</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sail-inferencer</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-rio-datatypes</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-rio-languages</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-queryalgebra</artifactId>
-            <version>4.1.1</version>
-            <type>pom</type>
         </dependency>
     </dependencies>
     <properties>

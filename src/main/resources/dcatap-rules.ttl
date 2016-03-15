@@ -1,24 +1,37 @@
 @prefix spin:	<http://spinrdf.org/spin#> . 
 @prefix sp:		<http://spinrdf.org/sp#> .
-@prefix spl: 	<http://spinrdf.org/spl#> .
-@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+@prefix spl:		<http://spinrdf.org/spl#> .
 @prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcat:	<http://www.w3.org/ns/dcat#> .
-@prefix dcterms:	<http://purl.org/dc/elements/1.1/> .
 
-dcat:Catalog
+dcat:Catalog a rdfs:Class ;
     spin:constraint [
 	a sp:Construct ;
         sp:text """
+            PREFIX spin:    <http://spinrdf.org/spin#>
+            PREFIX dcterms: <http://purl.org/dc/elements/1.1/>
+            PREFIX dcat:	<http://www.w3.org/ns/dcat#>
+
             CONSTRUCT {
                 _:violation a spin:ConstraintValidation ;
-                        spin:validationRoot ?this ;
-			spin:validationPath dcterms:license ;
-			rdfs:label "Catalog {?this} must have a license"
+                        spin:violationRoot ?this ;
+			spin:violationPath dcterms:license ;
+                        spin:violationLevel spin:Warning ;
+			rdfs:label "Catalog must have a license"
             }
             WHERE {
-                FILTER (NOT EXISTS {?this dcterms:license ?lic })
+                ?this a dcat:Catalog .
+                FILTER (NOT EXISTS {?this dcterms:lisense ?lic })
             }
         """
     ] .
 
+
+dcat:Dataset a rdfs:Class ;
+    spin:constraint [
+	a spl:Attribute ;
+        spl:predicate dcterms:lisense ;
+        spl:minCount 1 ;
+        spin:violationLevel spin:Warning ;
+        rdfs:label "Dataset {?this} must have a license"
+    ] .
