@@ -147,7 +147,7 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void text(String text) throws IOException {
-        writeln("<p>" + text + "</p>");
+        writeln("<p>" + text.replaceAll("\n", "<br/>") + "</p>");
     }
     
     /**

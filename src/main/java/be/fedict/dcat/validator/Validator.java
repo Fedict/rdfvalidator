@@ -30,13 +30,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
@@ -58,7 +62,7 @@ import org.slf4j.LoggerFactory;
 public class Validator {
     private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
-    public final static String RULES_BUILTIN = "dcatap11be";
+    public final static String RULES_BUILTIN = "/dcatap11be";
     public final static String BASE_URI = "http://data.gov.be";
     
     private final InputStream is;
@@ -75,7 +79,7 @@ public class Validator {
     private String readRule(InputStream is) {
         return new BufferedReader(new InputStreamReader(is))
                                     .lines()
-                                    .collect(Collectors.joining("\\n"));
+                                    .collect(Collectors.joining("\n"));
     }
     
     /**
@@ -87,33 +91,36 @@ public class Validator {
      */
     private List<String> readRules(String dir) throws IOException {
         ArrayList<String> rules = new ArrayList<>(); 
+       
+        List<File> files = Collections.emptyList();
         
         if (dir != null && !dir.isEmpty()) {
             LOG.info("Running validation queries from {}", dir);
-            
             File d = new File(dir);
             if (d.isDirectory()) {
-                List<File> files = Arrays.asList(d.listFiles());
-                for(File file: files) {
-                    LOG.info("Loading file {}", file.getAbsolutePath());
-                    String r = readRule(new FileInputStream(file));
-                    rules.add(r);
-                }
-            } else {
-                LOG.error("Not a directory {}", dir);
+                files = Arrays.asList(d.listFiles());
             }
         } else {
-            LOG.info("No rules directory specifief, using built-in rules");
-            String jar = ClassLoader.getSystemClassLoader().getResource(".").getPath();
-            ZipFile zip = new ZipFile(jar);
-            while (zip.entries().hasMoreElements()) {
-                ZipEntry ze = zip.entries().nextElement();
-                if (ze.getName().startsWith(RULES_BUILTIN) && !ze.isDirectory()) {
-                    LOG.info("Loading zip entry {}", ze.getName());
-                    String r = readRule(zip.getInputStream(ze));
-                    rules.add(r);
-                }
+            LOG.info("No rules directory specified, using built-in rules");
+            URI uri; 
+            try {
+                uri = Validator.class.getResource(RULES_BUILTIN).toURI();
+            } catch (URISyntaxException ex) { 
+               throw new IOException(ex);
             }
+            
+            Path path;
+            if (uri.getScheme().equals("jar")) {
+                FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                path = fs.getPath(RULES_BUILTIN);
+            } else {
+                path = Paths.get(uri);
+            }
+            files = Arrays.asList(path.toFile().listFiles());
+        }
+        
+        for(File f: files) {
+            rules.add(readRule(new FileInputStream(f)));
         }
         return rules;
     }
@@ -190,6 +197,7 @@ public class Validator {
         
         List<String> rules = readRules(dir);
         for(String rule: rules) {
+            LOG.debug("Validating {}", rule.replaceAll("\n", " "));
             validateRule(con, rule, sw);
         }
         
