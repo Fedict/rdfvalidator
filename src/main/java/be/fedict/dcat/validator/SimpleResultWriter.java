@@ -39,6 +39,8 @@ public interface SimpleResultWriter {
     public void title(String title) throws IOException;
     public void text(String text) throws IOException;
     
+    public void code(String text) throws IOException;
+    
     public void startTable(String title) throws IOException;
     public void columnNames(List<String> names) throws IOException;
     public void row(List<String> values) throws IOException;

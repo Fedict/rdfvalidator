@@ -53,14 +53,19 @@ public class HtmlWriter implements SimpleResultWriter {
         out.write(sep.getBytes());
     }
     
-    public void startSection() throws IOException {
-        writeln("<section>");
+    /**
+     * Write pre-formatted code.
+     * 
+     * @param text
+     * @throws IOException 
+     */
+    @Override
+    public void code(String text) throws IOException {
+        writeln("<code>");
+        writeln(text);
+        writeln("</code>");
     }
     
-    public void endSection() throws IOException {
-        writeln("</section>");
-        out.flush();
-    }
     
     /**
      * Start table
@@ -70,7 +75,6 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void startTable(String title) throws IOException {
-        startSection();
         writeln("<table>");
         writeln("<caption>" + title + "</caption>");
     }
@@ -123,7 +127,6 @@ public class HtmlWriter implements SimpleResultWriter {
     @Override
     public void endTable() throws IOException {
         writeln("</table>");
-        endSection();
         out.flush();
     }
     
@@ -147,7 +150,7 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void text(String text) throws IOException {
-        writeln("<p>" + text.replaceAll("\n", "<br/>") + "</p>");
+        writeln("<p>" + text + "</p>");
     }
     
     /**
@@ -157,8 +160,15 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void start() throws IOException {
+        writeln("<!DOCTYPE html>");
         writeln("<html>");
-        writeln("<head><title>DCAT Validator Report</title></head>");
+        writeln("<head>");
+        writeln("<meta charset=\"UTF-8\">");
+        writeln("<style>");
+        writeln("table { border: solid black 1px; }");
+        writeln("</style>");
+        writeln("<title>DCAT Validator Report</title>");
+        writeln("</head>");
         writeln("<body>");
         out.flush();
     }

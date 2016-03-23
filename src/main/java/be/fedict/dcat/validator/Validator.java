@@ -146,7 +146,8 @@ public class Validator {
                 
                 List<String> cols = res.getBindingNames();
                 
-                sw.startTable(query);
+                sw.code(query);
+                sw.startTable("");
                 sw.columnNames(cols);
         
                 while(res.hasNext()) {
