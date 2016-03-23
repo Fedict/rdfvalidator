@@ -24,21 +24,29 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.Rio;
-import org.openrdf.sail.inferencer.fc.DedupingInferencer;
-import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
-import org.openrdf.sail.spin.SpinSail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,92 +58,140 @@ import org.slf4j.LoggerFactory;
 public class Validator {
     private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
-    public final static String RULES_STATS = "stats";
+    public final static String RULES_BUILTIN = "dcatap11be";
     public final static String BASE_URI = "http://data.gov.be";
     
     private final InputStream is;
     private final RDFFormat fmt;
-    private final OutputStream os;
-    
-    private RDFWriter w;
-    
+    private final SimpleResultWriter sw;
+
     private Repository repo;
     
-    
     /**
-     * Get a Sesame SAIL
+     * Read a rule, this SPARQL query in a file.
      * 
-     * @return
-     * @throws IOException 
+     * @param is 
      */
-    private SpinSail getSail() throws IOException {
-        LOG.debug("Creating sail");
-        
-        SpinSail sail = new SpinSail();
-        sail.setBaseSail(new ForwardChainingRDFSInferencer(
-                            new DedupingInferencer(new MemoryStore())));
-        return sail;
+    private String readRule(InputStream is) {
+        return new BufferedReader(new InputStreamReader(is))
+                                    .lines()
+                                    .collect(Collectors.joining("\\n"));
     }
     
-    
     /**
-     * Load the SPIN ruleset(s).
+     * Validate the RDF triples using the rules (SPARQL queries) in a directory,
+     * or the built-in set if directory is NULL.
      * 
-     * @param rules name(s) of the ruleset(s)
+     * @param directory containing SPARQL queries
      * @throws IOException 
      */
-    private void loadRulesets(String rulesets[]) throws IOException {
-        RepositoryConnection con = repo.getConnection();
+    private List<String> readRules(String dir) throws IOException {
+        ArrayList<String> rules = new ArrayList<>(); 
         
-        for (String r: rulesets) {
-            LOG.info("Running ruleset {}", r);
-            File f = new File(r);
-            con.add(f, BASE_URI, RDFFormat.TURTLE);
+        if (dir != null && !dir.isEmpty()) {
+            LOG.info("Running validation queries from {}", dir);
+            
+            File d = new File(dir);
+            if (d.isDirectory()) {
+                List<File> files = Arrays.asList(d.listFiles());
+                for(File file: files) {
+                    LOG.info("Loading file {}", file.getAbsolutePath());
+                    String r = readRule(new FileInputStream(file));
+                    rules.add(r);
+                }
+            } else {
+                LOG.error("Not a directory {}", dir);
+            }
+        } else {
+            LOG.info("No rules directory specifief, using built-in rules");
+            String jar = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+            ZipFile zip = new ZipFile(jar);
+            while (zip.entries().hasMoreElements()) {
+                ZipEntry ze = zip.entries().nextElement();
+                if (ze.getName().startsWith(RULES_BUILTIN) && !ze.isDirectory()) {
+                    LOG.info("Loading zip entry {}", ze.getName());
+                    String r = readRule(zip.getInputStream(ze));
+                    rules.add(r);
+                }
+            }
+        }
+        return rules;
+    }
+    
+    /**
+     * Validate using a SPARQL query
+     * 
+     * @param con RDF triplestore connection
+     * @param query query string
+     * @param sw result writer
+     * @return false if validation rule is violated
+     * @throws IOException
+     */
+    private boolean validateRule(RepositoryConnection con, String query, SimpleResultWriter sw) 
+                                                            throws IOException {
+        boolean valid = true;
+        
+        TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
+        
+        try (TupleQueryResult res = q.evaluate()) {
+            if (res.hasNext()) {
+                valid = false;
+                
+                List<String> cols = res.getBindingNames();
+                
+                sw.startTable(query);
+                sw.columnNames(cols);
+        
+                while(res.hasNext()) {
+                    BindingSet next = res.next();
+                    List<String> row = cols.stream()
+                                    .map(col -> next.getValue(col).stringValue())
+                                    .collect(Collectors.toList());
+                    sw.row(row);
+                }
+                
+                sw.endTable();
+            }
         }
         
-        // Run built-in ruleset if none specified
-        if (rulesets.length == 0) {
-            LOG.info("No rulesets specified, run built-in set");
-            InputStream r = ClassLoader.getSystemResourceAsStream("dcatap-rules.ttl");
-            con.add(r, BASE_URI, RDFFormat.TURTLE);
-        }
+        return valid;
     }
     
     /**
      * Validates RDF triples from input stream against rulesets
      *
-     * @param rulesets ruleset(s) to validate
+     * @param dir directory containing SPARQL rules to validate
      * @return true if valid
      * @throws IOException 
      */
-    public boolean validate(String[] rulesets) throws IOException {
+    public boolean validate(String dir) throws IOException {
         boolean valid = false;
         
         LOG.debug("Initialize repository");
-        repo = new SailRepository(getSail());
+        repo = new SailRepository(new MemoryStore());
         repo.initialize();
- 
-        loadRulesets(rulesets);
-               
-        LOG.info("Adding triples");
         
-        w = Rio.createWriter(RDFFormat.TURTLE, this.os);
-    
+        LOG.debug("Adding triples");
+        
+        RepositoryConnection con = repo.getConnection();
         try {
-            repo.getConnection().add(is, BASE_URI, this.fmt);
+            con.add(is, BASE_URI, this.fmt);
         } catch (RepositoryException cve) {
-            LOG.error("Oeps");
+            LOG.error("Error adding triples", cve);
         }
-        
-        if(repo.getConnection().isEmpty()) {
+    
+        if(con.isEmpty()) {
             LOG.error("No statements loaded");
             repo.shutDown();
             return false;
         }
-    
-        repo.getConnection().export(w);
         
-        repo.getConnection().close();
+        LOG.info("{} triples loaded", con.size());
+        
+        List<String> rules = readRules(dir);
+        for(String rule: rules) {
+            validateRule(con, rule, sw);
+        }
         
         LOG.debug("Shutdown repository");
         repo.shutDown();
@@ -147,11 +203,12 @@ public class Validator {
      * Constructor
      * 
      * @param is input stream
-     * @param os output stream
+     * @param fmt RDF input stream format
+     * @param sw simple result writer
      */
-    public Validator(InputStream is, RDFFormat fmt, OutputStream os) {
+    public Validator(InputStream is, RDFFormat fmt, SimpleResultWriter sw) {
         this.is = is;
         this.fmt = fmt;
-        this.os = os;
+        this.sw = sw;
     }
 }

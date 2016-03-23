@@ -63,9 +63,9 @@ public class Main {
                             .desc("Report output file")
                             .hasArg().build());
         OPTS.addOption(Option.builder("r").longOpt("ruleset")
-                            .desc("Use ruleset file(s) instead of built-in rules")
-                            .hasArg().hasArgs()
-                            .build());
+                            .desc("Use directory with sparql query files " +
+                                    "instead of built-in rules")
+                            .hasArg().build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
                             .build());
@@ -124,10 +124,9 @@ public class Main {
             System.exit(-2);
         }
         
-        String[] rules = cmd.getOptionValues('r');
-        if (rules == null || rules.length == 0) {
-            LOG.warn("No ruleset specified");
-            rules = new String[0];
+        String rules = cmd.getOptionValue('r');
+        if (rules == null || rules.isEmpty()) {
+            LOG.warn("No ruleset directory specified");
         }
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
@@ -139,16 +138,17 @@ public class Main {
         }
         
         try(InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile))) {
-            /*
+                OutputStream os = new FileOutputStream(outfile)) {
+            HtmlWriter w = new HtmlWriter(os);
+            
             w.start();
             w.text("File to validate: " + infile);
             w.text("Current time: " + new Date());
-            */
-            Validator validator = new Validator(is, fmt.get(), os);
+            
+            Validator validator = new Validator(is, fmt.get(), w);
             validator.validate(rules);
             
-            //w.end();
+            w.end();
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-3);
