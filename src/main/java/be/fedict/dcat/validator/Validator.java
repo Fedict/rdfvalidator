@@ -24,20 +24,17 @@
  */
 package be.fedict.dcat.validator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,10 +72,10 @@ public class Validator {
      * Read a rule, this SPARQL query in a file.
      * 
      * @param is 
+     * @throws IOException
      */
-    private String readRule(InputStream is) {
-        return new BufferedReader(new InputStreamReader(is))
-                                    .lines()
+    private String readRule(Path p) throws IOException {
+        return Files.newBufferedReader(p).lines()
                                     .collect(Collectors.joining("\n"));
     }
     
@@ -92,14 +89,11 @@ public class Validator {
     private List<String> readRules(String dir) throws IOException {
         ArrayList<String> rules = new ArrayList<>(); 
        
-        List<File> files = Collections.emptyList();
+        Path pathdir = null;
         
         if (dir != null && !dir.isEmpty()) {
             LOG.info("Running validation queries from {}", dir);
-            File d = new File(dir);
-            if (d.isDirectory()) {
-                files = Arrays.asList(d.listFiles());
-            }
+            pathdir = Paths.get(dir);
         } else {
             LOG.info("No rules directory specified, using built-in rules");
             URI uri; 
@@ -108,19 +102,23 @@ public class Validator {
             } catch (URISyntaxException ex) { 
                throw new IOException(ex);
             }
-            
-            Path path;
+
             if (uri.getScheme().equals("jar")) {
                 FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                path = fs.getPath(RULES_BUILTIN);
+                pathdir = fs.getPath(RULES_BUILTIN);
             } else {
-                path = Paths.get(uri);
+                pathdir = Paths.get(uri);
             }
-            files = Arrays.asList(path.toFile().listFiles());
         }
         
-        for(File f: files) {
-            rules.add(readRule(new FileInputStream(f)));
+        if (Files.isDirectory(pathdir)) {
+            DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
+            for(Path file: stream) {
+                LOG.info("Rule {}", file);
+                rules.add(readRule(file));
+            }
+        } else {
+            LOG.warn("Path {} is not a directory", pathdir);
         }
         return rules;
     }

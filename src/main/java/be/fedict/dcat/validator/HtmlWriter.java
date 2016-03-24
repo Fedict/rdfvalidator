@@ -25,9 +25,15 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,6 +160,19 @@ public class HtmlWriter implements SimpleResultWriter {
     }
     
     /**
+     * Add stylesheet info
+     * 
+     * @throws IOException 
+     */
+    public void style() throws IOException {
+        InputStream s = ClassLoader.getSystemResourceAsStream("/style.css");
+        String style = new BufferedReader(new InputStreamReader(s)).lines()
+                                            .collect(Collectors.joining("\n"));
+        writeln("<style>");
+        writeln(style);
+        writeln("</style>");
+    }
+    /**
      * Write start of HTML
      * 
      * @throws IOException 
@@ -164,9 +183,7 @@ public class HtmlWriter implements SimpleResultWriter {
         writeln("<html>");
         writeln("<head>");
         writeln("<meta charset=\"UTF-8\">");
-        writeln("<style>");
-        writeln("table { border: solid black 1px; }");
-        writeln("</style>");
+        style();
         writeln("<title>DCAT Validator Report</title>");
         writeln("</head>");
         writeln("<body>");
