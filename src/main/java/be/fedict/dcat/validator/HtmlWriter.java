@@ -165,7 +165,7 @@ public class HtmlWriter implements SimpleResultWriter {
      * @throws IOException 
      */
     public void style() throws IOException {
-        InputStream s = ClassLoader.getSystemResourceAsStream("/style.css");
+        InputStream s = ClassLoader.getSystemResourceAsStream("style.css");
         String style = new BufferedReader(new InputStreamReader(s)).lines()
                                             .collect(Collectors.joining("\n"));
         writeln("<style>");
