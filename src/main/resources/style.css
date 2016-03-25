@@ -3,8 +3,15 @@ h1 {
     background-color: black;
     color: white;
 }
+
 table { 
     border: solid black 1px; 
     width: 100%; 
 }
+
+th {
+    background-color:black;
+    color: white;
+}
+
 code { white-space: pre; }

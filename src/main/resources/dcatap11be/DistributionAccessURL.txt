@@ -3,8 +3,8 @@
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-SELECT ?dataset
+SELECT ?distribution
 WHERE {
-    ?dataset a dcat:Dataset
-    FILTER NOT EXISTS { ?dataset dcterms:description ?description } 
+    ?distribution a dcat:Distribution
+    FILTER NOT EXISTS { ?distribution dcat:accessURL ?url } 
 }

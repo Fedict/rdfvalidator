@@ -29,9 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.file.Paths;
+import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -46,7 +44,7 @@ public class HtmlWriter implements SimpleResultWriter {
     private final static Logger LOG = LoggerFactory.getLogger(HtmlWriter.class);
     
     private final String sep;
-    private final OutputStream out;
+    private final Writer out;
     
     /**
      * Write a HTML line in a somewhat pretty-printed format
@@ -55,8 +53,8 @@ public class HtmlWriter implements SimpleResultWriter {
      * @throws IOException 
      */
     private void writeln(String s) throws IOException {
-        out.write(s.getBytes());
-        out.write(sep.getBytes());
+        out.write(s);
+        out.write(sep);
     }
     
     /**
@@ -111,7 +109,9 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void columnNames(List<String> headers) throws IOException {
+        writeln("<thead>");
         writeRow(headers, "th");
+        writeln("</thead>");
     }
     
     /**
@@ -207,7 +207,7 @@ public class HtmlWriter implements SimpleResultWriter {
      * 
      * @param out output stream
      */
-    public HtmlWriter(OutputStream out) {
+    public HtmlWriter(Writer out) {
         this.out = out;
         this.sep = System.lineSeparator();
     }

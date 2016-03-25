@@ -25,7 +25,7 @@
 package be.fedict.dcat.validator;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openrdf.query.BindingSet;
@@ -62,7 +63,7 @@ public class Validator {
     public final static String RULES_BUILTIN = "/dcatap11be";
     public final static String BASE_URI = "http://data.gov.be";
     
-    private final InputStream is;
+    private final Reader r;
     private final RDFFormat fmt;
     private final SimpleResultWriter sw;
 
@@ -179,7 +180,7 @@ public class Validator {
         
         RepositoryConnection con = repo.getConnection();
         try {
-            con.add(is, BASE_URI, this.fmt);
+            con.add(r, BASE_URI, this.fmt);
         } catch (RepositoryException cve) {
             LOG.error("Error adding triples", cve);
         }
@@ -192,6 +193,10 @@ public class Validator {
         
         LOG.info("{} triples loaded", con.size());
         
+        sw.start();
+        sw.title("DCAT-AP 1.1 Validation");
+        sw.text("Current time: " + new Date());
+        
         List<String> rules = readRules(dir);
         for(String rule: rules) {
             LOG.debug("Validating {}", rule.replaceAll("\n", " "));
@@ -200,6 +205,8 @@ public class Validator {
         
         LOG.debug("Shutdown repository");
         repo.shutDown();
+    
+        sw.end();
         
         return valid;
     }
@@ -207,12 +214,12 @@ public class Validator {
     /**
      * Constructor
      * 
-     * @param is input stream
+     * @param r input reader
      * @param fmt RDF input stream format
      * @param sw simple result writer
      */
-    public Validator(InputStream is, RDFFormat fmt, SimpleResultWriter sw) {
-        this.is = is;
+    public Validator(Reader r, RDFFormat fmt, SimpleResultWriter sw) {
+        this.r = r;
         this.fmt = fmt;
         this.sw = sw;
     }

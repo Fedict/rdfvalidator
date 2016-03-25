@@ -25,12 +25,16 @@
 package be.fedict.dcat.validator;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -135,22 +139,18 @@ public class Main {
             LOG.error("Could not determine file type of {}", infile);
             System.exit(-3);
         }
-        
-        try(InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                OutputStream os = new FileOutputStream(outfile)) {
-            HtmlWriter w = new HtmlWriter(os);
+
+        try(BufferedReader rbuf = Files.newBufferedReader(Paths.get(infile));
+            BufferedWriter wbuf = Files.newBufferedWriter(Paths.get(outfile))) {
             
-            w.start();
-            w.text("File to validate: " + infile);
-            w.text("Current time: " + new Date());
-            
-            Validator validator = new Validator(is, fmt.get(), w);
+            HtmlWriter w = new HtmlWriter(wbuf);
+  
+            Validator validator = new Validator(rbuf, fmt.get(), w);
             validator.validate(rules);
-            
-            w.end();
+
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
-            System.exit(-3);
+            System.exit(-4);
         }
         
         System.exit(0);
