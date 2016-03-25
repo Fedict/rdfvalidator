@@ -11,7 +11,8 @@ WHERE {
         VALUES (?property) {
             (dcterms:title)
             (dcterms:description)
-            (dcterms:dataset)
+            (dcterms:publisher)
+            (dcat:dataset)
         }
     } 
 }

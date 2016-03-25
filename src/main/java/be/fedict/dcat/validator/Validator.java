@@ -146,9 +146,7 @@ public class Validator {
         
         TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
     
-        sw.title(getComment(query));
-        
-        sw.code(query);
+        sw.code(getComment(query), query);
         
         try (TupleQueryResult res = q.evaluate()) {
             if (res.hasNext()) {

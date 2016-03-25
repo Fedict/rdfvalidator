@@ -1,4 +1,4 @@
-# Dataset missing mandatory properties
+# Dataset missing recommended properties
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -9,8 +9,9 @@ WHERE {
     FILTER NOT EXISTS { 
         ?dataset ?property ?value
         VALUES (?property) {
-            (dcterms:title)
-            (dcterms:description)
+            (dcat:theme)
+            (dcat:contactPoint)
+            (dcterms:publisher)
         }
     } 
 }

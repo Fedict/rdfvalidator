@@ -1,16 +1,18 @@
-# Dataset missing mandatory properties
+# Distribution missing recommended properties
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-SELECT ?dataset ?property
+SELECT ?distribution ?property
 WHERE {
-    ?dataset a dcat:Dataset
+    ?distribution a dcat:Distribution
     FILTER NOT EXISTS { 
-        ?dataset ?property ?value
+        ?distribution ?property ?value
         VALUES (?property) {
             (dcterms:title)
             (dcterms:description)
+            (dcterms:license)
+            (dcterms:language)
         }
     } 
 }

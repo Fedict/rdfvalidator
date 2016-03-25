@@ -63,14 +63,16 @@ public class HtmlWriter implements SimpleResultWriter {
     /**
      * Write pre-formatted code.
      * 
-     * @param text
+     * @param title title of the code
+     * @param code computer code / query
      * @throws IOException 
      */
     @Override
-    public void code(String text) throws IOException {
-        writeln("<code>");
-        writeln(text);
-        writeln("</code>");
+    public void code(String title, String code) throws IOException {
+        writeln("<detail>");
+        writeln("<summary>" + title + "</summary>");
+        writeln("<p><code>"+ code + "</code></p>");
+        writeln("</detail>");
     }
     
     
