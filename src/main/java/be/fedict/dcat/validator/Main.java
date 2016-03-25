@@ -122,7 +122,7 @@ public class Main {
         
         String outfile = cmd.getOptionValue('o');
         if (outfile == null || outfile.isEmpty()) {
-            LOG.error("Missing output file");
+            LOG.error("Missing report output file");
             printHelp();
             System.exit(-2);
         }
@@ -133,21 +133,11 @@ public class Main {
         }
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
-        
-        Optional<RDFFormat> fmt = Rio.getParserFormatForFileName(infile);
-        if (!fmt.isPresent()) {
-            LOG.error("Could not determine file type of {}", infile);
-            System.exit(-3);
-        }
 
-        try(BufferedReader rbuf = Files.newBufferedReader(Paths.get(infile));
-            BufferedWriter wbuf = Files.newBufferedWriter(Paths.get(outfile))) {
-            
-            HtmlWriter w = new HtmlWriter(wbuf);
-  
-            Validator validator = new Validator(rbuf, fmt.get(), w);
+        try{
+            HtmlWriter w = new HtmlWriter(Paths.get(outfile));
+            Validator validator = new Validator(Paths.get(infile), w);
             validator.validate(rules);
-
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-4);

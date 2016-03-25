@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -44,7 +46,8 @@ public class HtmlWriter implements SimpleResultWriter {
     private final static Logger LOG = LoggerFactory.getLogger(HtmlWriter.class);
     
     private final String sep;
-    private final Writer out;
+    private final Path path;
+    private Writer out;
     
     /**
      * Write a HTML line in a somewhat pretty-printed format
@@ -179,6 +182,8 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void start() throws IOException {
+        this.out = Files.newBufferedWriter(path);
+        
         writeln("<!DOCTYPE html>");
         writeln("<html>");
         writeln("<head>");
@@ -187,7 +192,7 @@ public class HtmlWriter implements SimpleResultWriter {
         writeln("<title>DCAT Validator Report</title>");
         writeln("</head>");
         writeln("<body>");
-        out.flush();
+        this.out.flush();
     }
     
     /**
@@ -199,16 +204,16 @@ public class HtmlWriter implements SimpleResultWriter {
     public void end() throws IOException {
         writeln("</body>");
         writeln("</html>");
-        out.close();
+        this.out.close();
     }
 
     /**
      * Constructor
      * 
-     * @param out output stream
+     * @param path output stream path
      */
-    public HtmlWriter(Writer out) {
-        this.out = out;
+    public HtmlWriter(Path path) {
+        this.path = path;
         this.sep = System.lineSeparator();
     }
 }

@@ -24,8 +24,9 @@
  */
 package be.fedict.dcat.validator;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
@@ -48,6 +50,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,23 +66,26 @@ public class Validator {
     public final static String RULES_BUILTIN = "/dcatap11be";
     public final static String BASE_URI = "http://data.gov.be";
     
-    private final Reader r;
-    private final RDFFormat fmt;
+    private final Path path;
     private final SimpleResultWriter sw;
 
     private Repository repo;
     
-    /**
-     * Read a rule, this SPARQL query in a file.
-     * 
-     * @param is 
-     * @throws IOException
-     */
-    private String readRule(Path p) throws IOException {
-        return Files.newBufferedReader(p).lines()
-                                    .collect(Collectors.joining("\n"));
-    }
     
+    /**
+     * Get the first line comment of the query
+     * 
+     * @param str
+     * @return comment or empty string
+     */
+    private String getComment(String str) {
+        if (str.startsWith("#")) {
+            int eol = str.indexOf(System.lineSeparator());
+            return str.substring(1, eol);
+        }
+        return "";
+    }            
+        
     /**
      * Validate the RDF triples using the rules (SPARQL queries) in a directory,
      * or the built-in set if directory is NULL.
@@ -116,7 +122,8 @@ public class Validator {
             DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
             for(Path file: stream) {
                 LOG.debug("Rule {}", file);
-                rules.add(readRule(file));
+                String rule = new String(Files.readAllBytes(file));
+                rules.add(rule);
             }
         } else {
             LOG.warn("Path {} is not a directory", pathdir);
@@ -138,6 +145,8 @@ public class Validator {
         int violations = 0;
         
         TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
+    
+        sw.title(getComment(query));
         
         sw.code(query);
         
@@ -171,16 +180,23 @@ public class Validator {
      */
     public boolean validate(String dir) throws IOException {
         boolean valid = false;
+        int violations = 0;
         
         LOG.debug("Initialize repository");
         repo = new SailRepository(new MemoryStore());
         repo.initialize();
         
+        Optional<RDFFormat> fmt = Rio.getParserFormatForFileName(path.toString());
+        if (!fmt.isPresent()) {
+            throw new IOException("Could not determine file type");
+        }
+        
         LOG.debug("Adding triples");
+        BufferedReader r = Files.newBufferedReader(path);
         
         RepositoryConnection con = repo.getConnection();
         try {
-            con.add(r, BASE_URI, this.fmt);
+            con.add(r, BASE_URI, fmt.get());
         } catch (RepositoryException cve) {
             LOG.error("Error adding triples", cve);
         }
@@ -194,33 +210,34 @@ public class Validator {
         LOG.info("{} triples loaded", con.size());
         
         sw.start();
+        
         sw.title("DCAT-AP 1.1 Validation");
+        sw.text("Validating: " + path);
+        sw.text("Number of triples: " + con.size());
         sw.text("Current time: " + new Date());
         
         List<String> rules = readRules(dir);
         for(String rule: rules) {
             LOG.debug("Validating {}", rule.replaceAll("\n", " "));
-            validateRule(con, rule, sw);
+            violations += validateRule(con, rule, sw);
         }
+        
+        sw.end();
         
         LOG.debug("Shutdown repository");
         repo.shutDown();
     
-        sw.end();
-        
         return valid;
     }
     
     /**
      * Constructor
      * 
-     * @param r input reader
-     * @param fmt RDF input stream format
+     * @param input input file or URL
      * @param sw simple result writer
      */
-    public Validator(Reader r, RDFFormat fmt, SimpleResultWriter sw) {
-        this.r = r;
-        this.fmt = fmt;
+    public Validator(Path input, SimpleResultWriter sw) {
+        this.path = input;
         this.sw = sw;
     }
 }
