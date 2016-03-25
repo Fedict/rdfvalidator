@@ -114,7 +114,7 @@ public class Validator {
         if (Files.isDirectory(pathdir)) {
             DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
             for(Path file: stream) {
-                LOG.info("Rule {}", file);
+                LOG.debug("Rule {}", file);
                 rules.add(readRule(file));
             }
         } else {
@@ -129,38 +129,36 @@ public class Validator {
      * @param con RDF triplestore connection
      * @param query query string
      * @param sw result writer
-     * @return false if validation rule is violated
+     * @return number of violations (if any)
      * @throws IOException
      */
-    private boolean validateRule(RepositoryConnection con, String query, SimpleResultWriter sw) 
+    private int validateRule(RepositoryConnection con, String query, SimpleResultWriter sw) 
                                                             throws IOException {
-        boolean valid = true;
+        int violations = 0;
         
         TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
         
+        sw.code(query);
+        
         try (TupleQueryResult res = q.evaluate()) {
             if (res.hasNext()) {
-                valid = false;
-                
                 List<String> cols = res.getBindingNames();
                 
-                sw.code(query);
                 sw.startTable("");
                 sw.columnNames(cols);
         
                 while(res.hasNext()) {
+                    violations++;
                     BindingSet next = res.next();
                     List<String> row = cols.stream()
                                     .map(col -> next.getValue(col).stringValue())
                                     .collect(Collectors.toList());
                     sw.row(row);
                 }
-                
                 sw.endTable();
             }
         }
-        
-        return valid;
+        return violations;
     }
     
     /**

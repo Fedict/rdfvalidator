@@ -1,0 +1,10 @@
+# Missing language tag
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?record
+WHERE {
+    ?record dcterms:title|dcterms:description|dcterms:keyword ?value
+    FILTER (isLiteral(?value) && lang(?value) = "" ) 
+}
