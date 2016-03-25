@@ -26,7 +26,6 @@ package be.fedict.dcat.validator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
@@ -219,6 +218,8 @@ public class Validator {
             LOG.debug("Validating {}", rule.replaceAll("\n", " "));
             violations += validateRule(con, rule, sw);
         }
+        
+        sw.text("Violations: " + violations);
         
         sw.end();
         
