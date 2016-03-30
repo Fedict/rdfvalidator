@@ -7,16 +7,16 @@ SELECT ?subject ?property ?value
 WHERE {
     ?subject ?property ?value
     FILTER (isLiteral(?value))
-    VALUES (?property) {
-        (dcat:accessURL)
-        (dcat:downloadURL)
-        (dcat:landingPage)
-        (dcat:theme)
-        (dcterms:license)
-        (dcterms:language)
-        (dcterms:spatial)
-        (dcterms:accrualPeriodicity)
-        (dcat:contactPoint)
-        (dcterms:publisher)
+    VALUES ?property {
+        dcat:accessURL
+        dcat:downloadURL
+        dcat:landingPage
+        dcat:theme
+        dcterms:license
+        dcterms:language
+        dcterms:spatial
+        dcterms:accrualPeriodicity
+        dcat:contactPoint
+        dcterms:publisher
     }
 }

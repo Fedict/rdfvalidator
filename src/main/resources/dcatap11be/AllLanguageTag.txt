@@ -7,9 +7,9 @@ SELECT ?subject ?property ?value
 WHERE {
     ?subject ?property ?value
     FILTER (isLiteral(?value) && lang(?value) = "" )
-    VALUES (?property) {
-        (dcterms:title)
-        (dcterms:description)
-        (dcterms:keyword)
+    VALUES ?property {
+        dcterms:title
+        dcterms:description
+        dcterms:keyword
     }
 }

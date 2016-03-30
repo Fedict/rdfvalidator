@@ -8,11 +8,11 @@ WHERE {
     ?catalog a dcat:Catalog
     FILTER NOT EXISTS { 
         ?catalog ?property ?value
-        VALUES (?property) {
-            (dcterms:title)
-            (dcterms:description)
-            (dcterms:publisher)
-            (dcat:dataset)
-        }
+    }
+    VALUES ?property {
+        dcterms:title
+        dcterms:description
+        dcterms:publisher
+        dcat:dataset
     } 
 }

@@ -8,10 +8,10 @@ WHERE {
     ?dataset a dcat:Dataset
     FILTER NOT EXISTS { 
         ?dataset ?property ?value
-        VALUES (?property) {
-            (dcat:theme)
-            (dcat:contactPoint)
-            (dcterms:publisher)
-        }
-    } 
+    }
+    VALUES ?property {
+        dcat:theme
+        dcat:contactPoint
+        dcterms:publisher
+    }
 }

@@ -8,11 +8,11 @@ WHERE {
     ?distribution a dcat:Distribution
     FILTER NOT EXISTS { 
         ?distribution ?property ?value
-        VALUES (?property) {
-            (dcterms:title)
-            (dcterms:description)
-            (dcterms:license)
-            (dcterms:language)
-        }
+    }
+    VALUES ?property {
+        dcterms:title
+        dcterms:description
+        dcterms:license
+        dcterms:language
     } 
 }

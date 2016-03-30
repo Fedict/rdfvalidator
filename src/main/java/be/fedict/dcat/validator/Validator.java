@@ -145,10 +145,11 @@ public class Validator {
                                                             throws IOException {
         int violations = 0;
         
+
         TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
     
         sw.code(getComment(query), query);
-        
+        LOG.info(query);        
         try (TupleQueryResult res = q.evaluate()) {
             if (res.hasNext()) {
                 List<String> cols = res.getBindingNames();

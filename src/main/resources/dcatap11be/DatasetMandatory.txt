@@ -8,9 +8,9 @@ WHERE {
     ?dataset a dcat:Dataset
     FILTER NOT EXISTS { 
         ?dataset ?property ?value
-        VALUES (?property) {
-            (dcterms:title)
-            (dcterms:description)
-        }
+    }
+    VALUES ?property {
+        dcterms:title
+        dcterms:description
     } 
 }

@@ -60,6 +60,7 @@ public class HtmlWriter implements SimpleResultWriter {
         out.write(sep);
     }
     
+    
     /**
      * Write pre-formatted code.
      * 
@@ -69,10 +70,12 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void code(String title, String code) throws IOException {
-        writeln("<detail>");
+        writeln("<details>");
         writeln("<summary>" + title + "</summary>");
-        writeln("<p><code>"+ code.replaceAll("<", "&lt;").replaceAll(">", "&gt;") + "</code></p>");
-        writeln("</detail>");
+        writeln("<p><pre><code>" + 
+                code.replaceAll("<", "&lt;").replaceAll(">", "&gt;") + 
+                "</code></pre></p>");
+        writeln("</details>");
     }
     
     
