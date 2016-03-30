@@ -6,5 +6,10 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 SELECT ?distribution ?property
 WHERE {
     ?distribution a dcat:Distribution
-    FILTER NOT EXISTS { ?distribution dcat:accessURL ?value } 
+    FILTER NOT EXISTS { 
+        ?distribution dcat:accessURL ?value
+    }
+    VALUES ?property {
+        dcat:accessURL
+    } 
 }

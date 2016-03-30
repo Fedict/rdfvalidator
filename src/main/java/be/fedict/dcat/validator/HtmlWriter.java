@@ -60,24 +60,40 @@ public class HtmlWriter implements SimpleResultWriter {
         out.write(sep);
     }
     
+    /**
+     * Write start of details section
+     * 
+     * @param title 
+     * @throws IOException
+     */
+    @Override
+    public void startSection(String title) throws IOException {
+        writeln("<details>");
+        writeln("<summary><h2>" + title + "</h2></summary>");
+    }
+    
+    /**
+     * Write end of details section
+     * 
+     * @throws IOException
+     */
+    @Override
+    public void endSection() throws IOException {
+        writeln("</details>");
+    }
     
     /**
      * Write pre-formatted code.
      * 
-     * @param title title of the code
      * @param code computer code / query
      * @throws IOException 
      */
     @Override
-    public void code(String title, String code) throws IOException {
-        writeln("<details>");
-        writeln("<summary>" + title + "</summary>");
+    public void code(String code) throws IOException {
         writeln("<p><pre><code>" + 
                 code.replaceAll("<", "&lt;").replaceAll(">", "&gt;") + 
                 "</code></pre></p>");
-        writeln("</details>");
     }
-    
     
     /**
      * Start table
@@ -88,7 +104,9 @@ public class HtmlWriter implements SimpleResultWriter {
     @Override
     public void startTable(String title) throws IOException {
         writeln("<table>");
-        writeln("<caption>" + title + "</caption>");
+        if (title != null && !title.isEmpty()) {
+            writeln("<caption>" + title + "</caption>");
+        }
     }
     
     /**
