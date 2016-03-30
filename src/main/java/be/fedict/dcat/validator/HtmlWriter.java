@@ -68,9 +68,9 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void code(String text) throws IOException {
-        writeln("<code>");
-        writeln(text);
-        writeln("</code>");
+        writeln("<pre><code>");
+        writeln(text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+        writeln("</code></pre>");
     }
     
     

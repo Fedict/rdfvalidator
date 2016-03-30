@@ -6,7 +6,8 @@ h1 {
 
 table { 
     border: solid black 1px; 
-    width: 100%; 
+    border-collapse: collapse;
+    width: 90%; 
 }
 
 th {
@@ -14,4 +15,15 @@ th {
     color: white;
 }
 
-code { white-space: pre; }
+td {
+    padding: 1em;
+}
+
+tbody tr:nth-child(even) {
+  background-color:linen;
+}
+
+
+tbody tr:nth-child(odd) {
+  background-color: lightyellow;
+}

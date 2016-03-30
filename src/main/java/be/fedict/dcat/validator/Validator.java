@@ -224,6 +224,8 @@ public class Validator {
             violations += validateRule(con, rule, sw);
         }
         
+        sw.text("Number of violations: " + violations);
+                
         sw.end();
         
         LOG.debug("Shutdown repository");
