@@ -26,7 +26,6 @@ package be.fedict.dcat.validator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
@@ -148,9 +147,7 @@ public class Validator {
         
         TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
     
-        sw.title(getComment(query));
-        
-        sw.code(query);
+        sw.code(getComment(query), query);
         
         try (TupleQueryResult res = q.evaluate()) {
             if (res.hasNext()) {
@@ -225,7 +222,7 @@ public class Validator {
         }
         
         sw.text("Number of violations: " + violations);
-                
+
         sw.end();
         
         LOG.debug("Shutdown repository");

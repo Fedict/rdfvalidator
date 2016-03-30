@@ -1,0 +1,15 @@
+# Distribution missing mandatory properties
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?distribution ?property
+WHERE {
+    ?distribution a dcat:Distribution
+    FILTER NOT EXISTS { 
+        ?distribution ?property ?value
+        VALUES (?property) {
+            (dcat:accessURL)
+        }
+    } 
+}
