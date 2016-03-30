@@ -80,8 +80,10 @@ public class Validator {
      */
     private String getComment(String str) {
         if (str.startsWith("#")) {
-            int eol = str.indexOf(System.lineSeparator());
-            return str.substring(1, eol);
+            int eol = str.replaceAll("\r", "\n").indexOf("\n");
+            if (eol > 1) {
+                return str.substring(1, eol);
+            }
         }
         return "";
     }            

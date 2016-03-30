@@ -1,0 +1,22 @@
+# Type must be a resource (URI), not a literal
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?subject ?property ?value
+WHERE {
+    ?subject ?property ?value
+    FILTER (isLiteral(?value))
+    VALUES (?property) {
+        (dcat:accessURL)
+        (dcat:downloadURL)
+        (dcat:landingPage)
+        (dcat:theme)
+        (dcterms:license)
+        (dcterms:language)
+        (dcterms:spatial)
+        (dcterms:accrualPeriodicity)
+        (dcat:contactPoint)
+        (dcterms:publisher)
+    }
+}
