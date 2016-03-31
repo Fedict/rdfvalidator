@@ -177,11 +177,10 @@ public class Validator {
      * Validates RDF triples from input stream against rulesets
      *
      * @param dir directory containing SPARQL rules to validate
-     * @return true if valid
+     * @return number of violations
      * @throws IOException 
      */
-    public boolean validate(String dir) throws IOException {
-        boolean valid = false;
+    public int validate(String dir) throws IOException {
         int violations = 0;
         
         LOG.debug("Initialize repository");
@@ -206,7 +205,7 @@ public class Validator {
         if(con.isEmpty()) {
             LOG.error("No statements loaded");
             repo.shutDown();
-            return false;
+            return -1;
         }
         
         LOG.info("{} triples loaded", con.size());
@@ -231,7 +230,7 @@ public class Validator {
         LOG.debug("Shutdown repository");
         repo.shutDown();
     
-        return valid;
+        return violations;
     }
     
     /**

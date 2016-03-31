@@ -98,21 +98,21 @@ public class Main {
         
         if (cmd == null || cmd.hasOption('h')) {
             printHelp();
-            System.exit(-1);
+            System.exit(-2);
         }
         
         String infile = cmd.getOptionValue('i');
         if (infile == null || infile.isEmpty()) {
             LOG.error("Missing input file or URL");
             printHelp();
-            System.exit(-2);
+            System.exit(-3);
         }
         
         String outfile = cmd.getOptionValue('o');
         if (outfile == null || outfile.isEmpty()) {
             LOG.error("Missing report output file");
             printHelp();
-            System.exit(-2);
+            System.exit(-4);
         }
         
         String rules = cmd.getOptionValue('r');
@@ -122,15 +122,17 @@ public class Main {
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
 
+        int issues = 0;
+        
         try{
             HtmlWriter w = new HtmlWriter(Paths.get(outfile));
             Validator validator = new Validator(Paths.get(infile), w);
-            validator.validate(rules);
+            issues  = validator.validate(rules);
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-4);
         }
         
-        System.exit(0);
+        System.exit(issues);
     }
 }
