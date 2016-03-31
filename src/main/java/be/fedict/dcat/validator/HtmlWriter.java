@@ -68,7 +68,7 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void startSection(String title) throws IOException {
-        writeln("<details>");
+        writeln("<details open>");
         writeln("<summary><h2>" + title + "</h2></summary>");
     }
     
@@ -90,9 +90,9 @@ public class HtmlWriter implements SimpleResultWriter {
      */
     @Override
     public void code(String code) throws IOException {
-        writeln("<p><pre><code>" + 
+        writeln("<pre><code>" + 
                 code.replaceAll("<", "&lt;").replaceAll(">", "&gt;") + 
-                "</code></pre></p>");
+                "</code></pre>");
     }
     
     /**

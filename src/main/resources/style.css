@@ -4,6 +4,10 @@ h1 {
     color: white;
 }
 
+h2 {
+    text-decoration: underline;
+}
+
 table { 
     border: solid black 1px; 
     border-collapse: collapse;
@@ -26,4 +30,8 @@ tbody tr:nth-child(even) {
 
 tbody tr:nth-child(odd) {
   background-color: lightyellow;
+}
+
+tbody tr:hover {
+    background-color: yellow !important;
 }
