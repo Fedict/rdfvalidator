@@ -1,0 +1,18 @@
+# Not using EU Publication Office Authority
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?subject ?property
+WHERE {
+    ?subject ?property ?obj
+    FILTER NOT EXISTS {
+        ?subject ?property ?value
+        FILTER (isIRI(?value) && STRSTARTS(STR(?value), ?taxonomy))
+    }
+    VALUES (?property ?taxonomy) {
+        (dcat:theme         "http://publications.europa.eu/resource/authority/data-theme/")
+        (dcterms:language   "http://publications.europa.eu/resource/authority/language/")
+        (dcterms:accrualPeriodicity "http://publications.europa.eu/resource/authority/frequency/")
+    }
+}

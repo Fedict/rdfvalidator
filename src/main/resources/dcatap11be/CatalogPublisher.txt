@@ -1,12 +1,12 @@
-# Dataset missing Distribution
+# Catalog missing publisher
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-SELECT ?dataset
+SELECT ?catalog
 WHERE {
-    ?dataset a dcat:Dataset
+    ?catalog a dcat:Catalog
     FILTER NOT EXISTS { 
-        ?dataset dcat:distribution ?dist 
+        ?catalog dcterms:publisher ?value
     } 
 }
