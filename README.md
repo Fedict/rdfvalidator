@@ -1,8 +1,17 @@
-# DCAT-AP Validator
+# RDF Validator
 
-Offline / command line [DCAT-AP 1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/description) validator.
+Offline / command line rdf validator.
 
-The stand-alone jar already contains a set of (SPARQL) rules, the output will be an HTML report.
+The stand-alone jar already contains a set of [DCAT-AP 1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/description) validator.
+SPARQL rules checking:
+ 
+ * mandatory classes and properties
+ * recommended properties
+ * the use of the EU Publication Office's [MDR Authority](http://publications.europa.eu/mdr/authority/) lists (controlled vocabularies)
+ * best practices (e.g. language tags on literals)
+
+The output will be an HTML report with a list of subjects violating the rule.
+
 
 ### Requirements
 

@@ -22,7 +22,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.dcat.validator;
+package be.fedict.rdf.validator;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -49,14 +49,21 @@ public class Main {
     static {
         OPTS.addOption(Option.builder("i").longOpt("input")
                             .desc("Input file or URL")
-                            .hasArg().build());
+                            .hasArg().argName("FILE")
+                            .build());
         OPTS.addOption(Option.builder("o").longOpt("output")
                             .desc("Report output file")
-                            .hasArg().build());
-        OPTS.addOption(Option.builder("r").longOpt("ruleset")
+                            .hasArg().argName("FILE")
+                            .build());
+        OPTS.addOption(Option.builder("b").longOpt("builtin")
+                            .desc("Use built-in ruleset")
+                            .hasArg().argName("RULESET")
+                            .build());
+        OPTS.addOption(Option.builder("d").longOpt("directory")
                             .desc("Use directory with sparql query files " +
                                     "instead of built-in rules")
-                            .hasArg().build());
+                            .hasArg().argName("RULESET")
+                            .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
                             .build());
@@ -85,7 +92,8 @@ public class Main {
      */
     private static void printHelp() {
         HelpFormatter help = new HelpFormatter();
-        help.printHelp("Validator", "DCAT-AP 1.1 validator", OPTS, null);
+        help.printHelp("java -jar Validator.jar", 
+                        "Validate an RDF file", OPTS, null, true);
     }
     
     /**
@@ -118,6 +126,8 @@ public class Main {
         String rules = cmd.getOptionValue('r');
         if (rules == null || rules.isEmpty()) {
             LOG.warn("No ruleset directory specified");
+            
+            rules = cmd.getOptionValue('b');
         }
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
