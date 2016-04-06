@@ -21,7 +21,7 @@
         <configuration>
           <transformers>
             <transformer>
-              <mainClass>be.fedict.dcat.validator.Main</mainClass>
+              <mainClass>be.fedict.rdf.validator.Main</mainClass>
             </transformer>
             <transformer />
           </transformers>

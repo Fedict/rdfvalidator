@@ -49,19 +49,18 @@ public class Main {
     static {
         OPTS.addOption(Option.builder("i").longOpt("input")
                             .desc("Input file or URL")
-                            .hasArg().argName("FILE")
+                            .hasArg().argName("FILE").required()
                             .build());
         OPTS.addOption(Option.builder("o").longOpt("output")
                             .desc("Report output file")
-                            .hasArg().argName("FILE")
+                            .hasArg().argName("FILE").required()
                             .build());
         OPTS.addOption(Option.builder("b").longOpt("builtin")
                             .desc("Use built-in ruleset")
                             .hasArg().argName("RULESET")
                             .build());
         OPTS.addOption(Option.builder("d").longOpt("directory")
-                            .desc("Use directory with sparql query files " +
-                                    "instead of built-in rules")
+                            .desc("Use directory with SPARQL rules")
                             .hasArg().argName("RULESET")
                             .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
@@ -125,9 +124,12 @@ public class Main {
         
         String rules = cmd.getOptionValue('r');
         if (rules == null || rules.isEmpty()) {
-            LOG.warn("No ruleset directory specified");
+            LOG.info("No ruleset directory specified");
             
             rules = cmd.getOptionValue('b');
+            if (rules == null || rules.isEmpty()) {
+                LOG.warn("No ruleset directory nor builtin set specified");
+            }
         }
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
