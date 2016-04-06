@@ -86,7 +86,36 @@ public class Validator {
         }
         return "";
     }            
+    
+    /**
+     * Get path from directory or jar
+     * 
+     * @param dir
+     * @return
+     * @throws IOException 
+     */
+    private Path getPath(String dir) throws IOException {
+        if (dir != null && !dir.isEmpty()) {
+            LOG.info("Running validation queries from {}", dir);
+            return Paths.get(dir);
+        }
         
+        LOG.info("No rules directory specified, using built-in rules");
+        URI uri;
+        try {
+            uri = Validator.class.getResource(RULES_BUILTIN).toURI();
+        } catch (URISyntaxException ex) {
+            throw new IOException(ex);
+        }
+
+        if (uri.getScheme().equals("jar")) {
+            FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+            return fs.getPath(RULES_BUILTIN);
+        }
+        
+        return Paths.get(uri);
+    }
+
     /**
      * Validate the RDF triples using the rules (SPARQL queries) in a directory,
      * or the built-in set if directory is NULL.
@@ -97,27 +126,7 @@ public class Validator {
     private List<String> readRules(String dir) throws IOException {
         ArrayList<String> rules = new ArrayList<>(); 
        
-        Path pathdir = null;
-        
-        if (dir != null && !dir.isEmpty()) {
-            LOG.info("Running validation queries from {}", dir);
-            pathdir = Paths.get(dir);
-        } else {
-            LOG.info("No rules directory specified, using built-in rules");
-            URI uri; 
-            try {
-                uri = Validator.class.getResource(RULES_BUILTIN).toURI();
-            } catch (URISyntaxException ex) { 
-               throw new IOException(ex);
-            }
-
-            if (uri.getScheme().equals("jar")) {
-                FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                pathdir = fs.getPath(RULES_BUILTIN);
-            } else {
-                pathdir = Paths.get(uri);
-            }
-        }
+        Path pathdir = getPath(dir);
         
         if (Files.isDirectory(pathdir)) {
             DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
@@ -212,8 +221,9 @@ public class Validator {
         
         sw.start();
         
-        sw.title("DCAT-AP 1.1 Validation");
-        sw.text("Validating: " + path);
+        sw.title("RDF Validation");
+        sw.text("Ruleset: " + dir);
+        sw.text("File to validate: " + path);
         sw.text("Number of triples: " + con.size());
         sw.text("Current time: " + new Date());
         
