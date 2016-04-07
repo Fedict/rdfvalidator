@@ -1,4 +1,4 @@
-# Literal missing language tag
+# Missing language tag
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -7,4 +7,9 @@ SELECT ?subject ?property ?value
 WHERE {
     ?subject ?property ?value
     FILTER (isLiteral(?value) && lang(?value) = "" )
+    VALUES ?property {
+        dcterms:title
+        dcterms:description
+        dcterms:keyword
+    }
 }

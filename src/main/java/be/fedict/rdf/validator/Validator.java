@@ -100,7 +100,7 @@ public class Validator {
             return Paths.get(dir);
         }
         
-        LOG.info("No rules directory specified, using built-in rules");
+        LOG.info("Using built-in rules {}", Validator.RULES_BUILTIN);
         URI uri;
         try {
             uri = Validator.class.getResource(RULES_BUILTIN).toURI();
