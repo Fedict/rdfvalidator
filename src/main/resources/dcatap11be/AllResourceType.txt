@@ -2,21 +2,28 @@
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX vcard:   <http://www.w3.org/2006/vcard/ns#>
 
 SELECT ?subject ?property ?value
 WHERE {
     ?subject ?property ?value
-    FILTER (isLiteral(?value))
+    FILTER (!isIRI(?value))
     VALUES ?property {
         dcat:accessURL
         dcat:downloadURL
         dcat:landingPage
-        dcat:theme
-        dcterms:license
-        dcterms:language
-        dcterms:spatial
-        dcterms:accrualPeriodicity
         dcat:contactPoint
+        dcat:theme
+        dcterms:accrualPeriodicity
+        dcterms:format
+        dcterms:language
+        dcterms:license
         dcterms:publisher
+        dcterms:rights
+        dcterms:spatial
+        foaf:homepage
+        foaf:page
+        vcard:hasEmail
     }
 }

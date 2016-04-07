@@ -1,0 +1,8 @@
+# Missing RDF class type
+
+SELECT ?s
+WHERE {
+    FILTER NOT EXISTS {
+        ?s a ?class
+    }
+}

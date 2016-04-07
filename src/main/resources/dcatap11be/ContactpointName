@@ -1,0 +1,11 @@
+# Contactpoint missing name
+
+PREFIX vcard:   <http://www.w3.org/2006/vcard/ns#>
+
+SELECT ?org
+WHERE {
+    ?org a vcard:Organization
+    FILTER NOT EXISTS { 
+        ?org vcard:fn ?name
+    }
+}

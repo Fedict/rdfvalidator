@@ -12,6 +12,7 @@ WHERE {
     }
     VALUES (?property ?taxonomy) {
         (dcat:theme         "http://publications.europa.eu/resource/authority/data-theme/")
+        (dcterms:format     "http://publications.europa.eu/resource/authority/file-type/")
         (dcterms:language   "http://publications.europa.eu/resource/authority/language/")
         (dcterms:accrualPeriodicity "http://publications.europa.eu/resource/authority/frequency/")
     }
