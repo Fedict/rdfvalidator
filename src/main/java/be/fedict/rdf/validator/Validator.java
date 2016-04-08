@@ -159,6 +159,7 @@ public class Validator {
         sw.startSection(getComment(query));
         sw.code(query);
         
+        Date start = new Date();
         try (TupleQueryResult res = q.evaluate()) {
             if (res.hasNext()) {
                 List<String> cols = res.getBindingNames();
@@ -177,6 +178,8 @@ public class Validator {
                 sw.endTable();
             }
         }
+        LOG.debug("Query took {} ms", new Date().getTime() - start.getTime());
+        
         if (violations == 0) {
             sw.text("OK");
         }
@@ -207,20 +210,21 @@ public class Validator {
         LOG.debug("Adding triples");
         BufferedReader r = Files.newBufferedReader(path);
         
+        Date start = new Date();
         RepositoryConnection con = repo.getConnection();
         try {
             con.add(r, BASE_URI, fmt.get());
         } catch (RepositoryException cve) {
             LOG.error("Error adding triples", cve);
         }
-    
+        LOG.info("{} triples loaded in {} ms", 
+                con.size(), new Date().getTime() - start.getTime());
+                
         if(con.isEmpty()) {
             LOG.error("No statements loaded");
             repo.shutDown();
             return -1;
         }
-        
-        LOG.info("{} triples loaded", con.size());
         
         sw.start();
         
