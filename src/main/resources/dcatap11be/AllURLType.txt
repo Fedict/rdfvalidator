@@ -1,4 +1,4 @@
-# Type must be a resource (URI), not a literal
+# Type of links and email adresses must be a resource (URI), not a literal
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -10,9 +10,11 @@ WHERE {
     ?subject ?property ?value
     FILTER (!isIRI(?value))
     VALUES ?property {
-        dcat:contactPoint
-        dcterms:license
-        dcterms:publisher
-        dcterms:rights
+        dcat:accessURL
+        dcat:downloadURL
+        dcat:landingPage
+        foaf:homepage
+        foaf:page
+        vcard:hasEmail
     }
 }

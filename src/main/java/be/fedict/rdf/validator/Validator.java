@@ -177,6 +177,9 @@ public class Validator {
                 sw.endTable();
             }
         }
+        if (violations == 0) {
+            sw.text("OK");
+        }
         sw.endSection();
         
         return violations;

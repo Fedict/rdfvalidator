@@ -1,4 +1,4 @@
-# Type must be a resource (URI), not a literal
+# Type must be a resource (URI, i.e. taxonomy term) not a literal
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -10,9 +10,12 @@ WHERE {
     ?subject ?property ?value
     FILTER (!isIRI(?value))
     VALUES ?property {
-        dcat:contactPoint
+        dcat:theme
+        dcterms:accrualPeriodicity
+        dcterms:format
+        dcterms:language
         dcterms:license
-        dcterms:publisher
         dcterms:rights
+        dcterms:spatial
     }
 }
