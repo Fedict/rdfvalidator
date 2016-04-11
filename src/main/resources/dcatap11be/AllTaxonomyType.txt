@@ -14,8 +14,6 @@ WHERE {
         dcterms:accrualPeriodicity
         dcterms:format
         dcterms:language
-        dcterms:license
-        dcterms:rights
         dcterms:spatial
     }
 }
