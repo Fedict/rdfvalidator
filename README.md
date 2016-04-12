@@ -64,7 +64,7 @@ If no ruleset is specified, the built-in rulesets for DCAT-AP 1.1
 
 Use -r to specify a directory containing SPARQL rules
 
-    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html -r directory
+    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html -r dir1 dir2
 
 
 Use -D to set logging level and save the log to a file
