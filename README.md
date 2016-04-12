@@ -2,6 +2,11 @@
 
 Offline / command line rdf validator.
 
+The output will be an [HTML report](dist/example/validator.html) with a list of 
+subjects violating the rule.
+
+### Built-in rulesets
+
 The stand-alone jar already contains a set of 
 [DCAT-AP 1.1] (https://joinup.ec.europa.eu/asset/dcat_application_profile/description)
 SPARQL rules checking:
@@ -10,9 +15,6 @@ SPARQL rules checking:
  * recommended properties
  * the use of the EU Publication Office's [MDR Authority](http://publications.europa.eu/mdr/authority/) lists (controlled vocabularies)
  * best practices (e.g. language tags on literals)
-
-The output will be an [HTML report](dist/example/validator.html) with a list of 
-subjects violating the rule.
 
 
 ### Requirements
@@ -58,13 +60,16 @@ Invoke with
 
     # java -jar validator.jar -i dcat_ap_file.ttl -o report.html
 
-If no ruleset is specified, the built-in rulesets for DCAT-AP 1.1
-(mandatory + best practices) will be used.
-
-
 Use -r to specify a directory containing SPARQL rules
 
     # java -jar validator.jar -i dcat_ap_file.ttl -o report.html -r dir1 dir2
+
+
+If no ruleset is specified, the built-in rulesets for DCAT-AP 1.1
+(mandatory + best practices for data.gov.be) will be used. This is equivalent to 
+
+    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html
+            -r builtin://dcatap11 builtin://dcatap11be
 
 
 Use -D to set logging level and save the log to a file
