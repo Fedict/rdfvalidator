@@ -1,4 +1,4 @@
-# Catalog missing description
+# Catalog missing mandatory title
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -7,6 +7,6 @@ SELECT ?catalog
 WHERE {
     ?catalog a dcat:Catalog
     FILTER NOT EXISTS { 
-        ?catalog dcterms:description ?value
+        ?catalog dcterms:title ?value
     }
 }

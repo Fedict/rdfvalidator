@@ -1,12 +1,12 @@
-# Dataset missing title
+# Distribution missing mandatory access URL
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-SELECT ?dataset
+SELECT ?dist
 WHERE {
-    ?dataset a dcat:Dataset
+    ?dist a dcat:Distribution
     FILTER NOT EXISTS { 
-        ?dataset dcterms:title ?value
+        ?dist dcat:accessURL ?value
     }
 }

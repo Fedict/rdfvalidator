@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 public class Validator {
     private final static Logger LOG = LoggerFactory.getLogger(Validator.class);
     
-    public final static String RULES_BUILTIN = "/dcatap11be";
+    public final static String BUILTIN = "builtin://";
     public final static String BASE_URI = "http://data.gov.be";
     
     private final Path path;
@@ -94,25 +94,29 @@ public class Validator {
      * @return
      * @throws IOException 
      */
-    private Path getPath(String dir) throws IOException {
-        if (dir != null && !dir.isEmpty()) {
-            LOG.info("Running validation queries from {}", dir);
-            return Paths.get(dir);
+    private Path getPath(String ruleset) throws IOException {
+        if (ruleset == null || ruleset.isEmpty()) {
+            throw new IOException("Empty or null ruleset");
         }
         
-        LOG.info("Using built-in rules {}", Validator.RULES_BUILTIN);
+        if (!ruleset.startsWith(BUILTIN)) {
+            LOG.info("Using validation queries from directory {}", ruleset);
+            return Paths.get(ruleset);
+        }
+        
+        String builtin = ruleset.replaceFirst(BUILTIN, "/");
+        LOG.info("Using built-in rulesets {}", builtin);
+                
         URI uri;
         try {
-            uri = Validator.class.getResource(RULES_BUILTIN).toURI();
+            uri = Validator.class.getResource(builtin).toURI();
         } catch (URISyntaxException ex) {
             throw new IOException(ex);
         }
-
         if (uri.getScheme().equals("jar")) {
             FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
-            return fs.getPath(RULES_BUILTIN);
+            return fs.getPath(builtin);
         }
-        
         return Paths.get(uri);
     }
 
@@ -120,13 +124,13 @@ public class Validator {
      * Validate the RDF triples using the rules (SPARQL queries) in a directory,
      * or the built-in set if directory is NULL.
      * 
-     * @param directory containing SPARQL queries
+     * @param ruleset ruleset containing SPARQL queries
      * @throws IOException 
      */
-    private List<String> readRules(String dir) throws IOException {
+    private List<String> readRules(String ruleset) throws IOException {
         ArrayList<String> rules = new ArrayList<>(); 
        
-        Path pathdir = getPath(dir);
+        Path pathdir = getPath(ruleset);
         
         if (Files.isDirectory(pathdir)) {
             DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
@@ -191,13 +195,55 @@ public class Validator {
     /**
      * Validates RDF triples from input stream against rulesets
      *
-     * @param dir directory containing SPARQL rules to validate
+     * @param rulesets directory or built-in set(s) containing SPARQL rules to validate
      * @return number of violations
      * @throws IOException 
      */
-    public int validate(String dir) throws IOException {
+    public int validate(String[] rulesets) throws IOException {
         int violations = 0;
         
+        RepositoryConnection con = repo.getConnection();
+        
+        sw.start();
+        
+        sw.title("RDF Validation");
+        sw.text("File to validate: " + path);
+        sw.text("Number of triples: " + con.size());
+        sw.text("Current time: " + new Date());
+        
+        for(String ruleset: rulesets) {
+            sw.startSection(ruleset);
+            List<String> rules = readRules(ruleset);
+        
+            for(String rule: rules) {
+                LOG.debug("Validating {}", rule.replaceAll("\n", " "));
+                violations += validateRule(con, rule, sw);
+            }
+            sw.endSection();
+        }
+        
+        sw.text("Number of violations: " + violations);
+
+        sw.end();
+        
+        return violations;
+    }
+    
+    /**
+     * Close repository
+     */
+    public void close() {
+        LOG.debug("Shutdown repository");
+        repo.getConnection().close();
+        repo.shutDown();
+    }
+    
+    /**
+     * Initialize repository and load triples
+     * 
+     * @throws IOException 
+     */
+    public void init() throws IOException {
         LOG.debug("Initialize repository");
         repo = new SailRepository(new MemoryStore());
         repo.initialize();
@@ -222,33 +268,9 @@ public class Validator {
                 
         if(con.isEmpty()) {
             LOG.error("No statements loaded");
-            repo.shutDown();
-            return -1;
+            close();
         }
-        
-        sw.start();
-        
-        sw.title("RDF Validation");
-        sw.text("Ruleset: " + dir);
-        sw.text("File to validate: " + path);
-        sw.text("Number of triples: " + con.size());
-        sw.text("Current time: " + new Date());
-        
-        List<String> rules = readRules(dir);
-        for(String rule: rules) {
-            LOG.debug("Validating {}", rule.replaceAll("\n", " "));
-            violations += validateRule(con, rule, sw);
-        }
-        
-        sw.text("Number of violations: " + violations);
-
-        sw.end();
-        
-        LOG.debug("Shutdown repository");
-        repo.shutDown();
-    
-        return violations;
-    }
+    } 
     
     /**
      * Constructor

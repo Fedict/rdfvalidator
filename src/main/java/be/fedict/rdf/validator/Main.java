@@ -48,20 +48,16 @@ public class Main {
     
     static {
         OPTS.addOption(Option.builder("i").longOpt("input")
-                            .desc("Input file or URL")
+                            .desc("RDF input file or URL")
                             .hasArg().argName("FILE").required()
                             .build());
         OPTS.addOption(Option.builder("o").longOpt("output")
-                            .desc("Report output file")
+                            .desc("HTML report output file")
                             .hasArg().argName("FILE").required()
                             .build());
-        OPTS.addOption(Option.builder("b").longOpt("builtin")
-                            .desc("Use built-in ruleset")
-                            .hasArg().argName("RULESET")
-                            .build());
-        OPTS.addOption(Option.builder("d").longOpt("directory")
-                            .desc("Use directory with SPARQL rules")
-                            .hasArg().argName("RULESET")
+        OPTS.addOption(Option.builder("r").longOpt("rulesets")
+                            .desc("Use rulesets with SPARQL rules (path or built-in)")
+                            .hasArgs().argName("RULESET")
                             .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
@@ -122,14 +118,11 @@ public class Main {
             System.exit(-4);
         }
         
-        String rules = cmd.getOptionValue('r');
-        if (rules == null || rules.isEmpty()) {
-            LOG.info("No ruleset directory specified");
-            
-            rules = cmd.getOptionValue('b');
-            if (rules == null || rules.isEmpty()) {
-                LOG.warn("No ruleset directory nor builtin set specified");
-            }
+        String[] rules = cmd.getOptionValues('r');
+        if (rules == null || rules.length == 0) {
+            LOG.warn("No rulesets specified");
+            LOG.warn("Using built-in DCAT-AP rulesets");
+            rules = new String[]{ "builtin://dcatap11", "builtin://dcatap11be" };
         }
         
         LOG.info("Reading data from {}, writing to {}", infile, outfile);
@@ -139,7 +132,9 @@ public class Main {
         try{
             HtmlWriter w = new HtmlWriter(Paths.get(outfile));
             Validator validator = new Validator(Paths.get(infile), w);
+            validator.init();
             issues  = validator.validate(rules);
+            validator.close();
         } catch (IOException ex) {
             LOG.error("Validation failed {}", ex.getMessage());
             System.exit(-4);

@@ -1,4 +1,4 @@
-# Contactpoint missing name
+# Contactpoint missing mandatory name
 
 PREFIX vcard:   <http://www.w3.org/2006/vcard/ns#>
 

@@ -1,4 +1,4 @@
-# Catalog missing publisher
+# Catalog missing mandatory description
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -7,6 +7,6 @@ SELECT ?catalog
 WHERE {
     ?catalog a dcat:Catalog
     FILTER NOT EXISTS { 
-        ?catalog dcterms:publisher ?value
-    } 
+        ?catalog dcterms:description ?value
+    }
 }

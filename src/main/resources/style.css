@@ -8,6 +8,20 @@ h2 {
     text-decoration: underline;
 }
 
+details {
+    margin-left: 1em;
+    margin-right: 1em;
+    border: solid black 1px; 
+}
+
+summary {
+    background-color: lightgray;
+}
+
+summary h2 {
+    margin-top: 0;
+}
+
 table { 
     border: solid black 1px; 
     border-collapse: collapse;
