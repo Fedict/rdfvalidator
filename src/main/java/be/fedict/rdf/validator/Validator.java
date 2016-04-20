@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,7 +115,12 @@ public class Validator {
             throw new IOException(ex);
         }
         if (uri.getScheme().equals("jar")) {
-            FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+            FileSystem fs;
+            try {
+                fs = FileSystems.getFileSystem(uri);
+            } catch (FileSystemNotFoundException f) {
+                fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+            }
             return fs.getPath(builtin);
         }
         return Paths.get(uri);

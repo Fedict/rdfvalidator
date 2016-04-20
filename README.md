@@ -58,17 +58,20 @@ WHERE {
 
 Invoke with
 
-    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html
+    # java -jar validator.jar -i dcat_ap_file.nt -o report.html
+
+The input file can be RDF/XML (.xml), NTriples (.nt) or Turtle (.ttl)
+The output file is always an HTML file.
 
 Use -r to specify a directory containing SPARQL rules
 
-    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html -r dir1 dir2
+    # java -jar validator.jar -i dcat_ap_file.nt -o report.html -r dir1 dir2
 
 
 If no ruleset is specified, the built-in rulesets for DCAT-AP 1.1
 (mandatory + best practices for data.gov.be) will be used. This is equivalent to 
 
-    # java -jar validator.jar -i dcat_ap_file.ttl -o report.html
+    # java -jar validator.jar -i dcat_ap_file.nt -o report.html
             -r builtin://dcatap11 builtin://dcatap11be
 
 
