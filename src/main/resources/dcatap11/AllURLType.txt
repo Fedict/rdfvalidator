@@ -1,4 +1,4 @@
-# Type of links and email adresses must be a resource (URI), not a literal
+# Type of links and email addresses must be a resource (IRI), not a literal
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
