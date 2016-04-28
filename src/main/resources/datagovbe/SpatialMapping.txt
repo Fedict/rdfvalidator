@@ -1,0 +1,14 @@
+# DCAT license not mapped to Drupal
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dgov:    <http://data.gov.be#>
+
+SELECT ?dist
+WHERE {
+    ?dist a dcat:Distribution .
+    ?dist dcterms:license ?license
+    FILTER NOT EXISTS { 
+        ?dist dgov:license ?drupal
+    }
+}

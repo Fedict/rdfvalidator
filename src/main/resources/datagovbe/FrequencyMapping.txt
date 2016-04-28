@@ -1,0 +1,14 @@
+# DCAT accrualPeriodicity not mapped to Drupal
+
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dgov:    <http://data.gov.be#>
+
+SELECT ?dataset
+WHERE {
+    ?dataset a dcat:Dataset .
+    ?dataset dcterms:accrualPeriodicity ?freq
+    FILTER NOT EXISTS { 
+        ?dataset dgov:freq ?drupal
+    }
+}

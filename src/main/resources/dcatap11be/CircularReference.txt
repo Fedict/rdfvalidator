@@ -1,0 +1,6 @@
+# Subject with reference to itself / circular
+
+SELECT ?subject ?property
+WHERE {
+    ?subject ?property ?subject
+}
