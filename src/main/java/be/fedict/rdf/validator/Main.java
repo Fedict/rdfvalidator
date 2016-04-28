@@ -44,6 +44,9 @@ import org.slf4j.LoggerFactory;
 public class Main {
     private final static Logger LOG = LoggerFactory.getLogger(Main.class);
     
+    private static final String[] BUILTINS = 
+                                    { "datagovbe", "dcatap11", "dcatap11be" };
+    
     private static final Options OPTS = new Options();
     
     static {
@@ -61,6 +64,9 @@ public class Main {
                             .build());
         OPTS.addOption(Option.builder("h").longOpt("help")
                             .desc("Print this help text")
+                            .build());
+        OPTS.addOption(Option.builder("v").longOpt("version")
+                            .desc("Version")
                             .build());
     }
     
@@ -86,9 +92,16 @@ public class Main {
      * Print help
      */
     private static void printHelp() {
+        String name = Main.class.getPackage().toString();
+        
+        StringBuilder buf = new StringBuilder("\nBuilt-in rulesets: ");
+        for (String s : BUILTINS ) {
+            buf.append("builtin://").append(s).append(" ");
+        }
+        
         HelpFormatter help = new HelpFormatter();
-        help.printHelp("java -jar Validator.jar", 
-                        "Validate an RDF file", OPTS, null, true);
+        help.printHelp("java -jar Validator.jar", "\n" + name + "\n", 
+                        OPTS, buf.toString(), true);
     }
     
     /**
@@ -99,7 +112,7 @@ public class Main {
     public static void main(String[] args) {
         CommandLine cmd = parseArgs(args);
         
-        if (cmd == null || cmd.hasOption('h')) {
+        if (cmd == null || cmd.hasOption('h') || cmd.hasOption('v')) {
             printHelp();
             System.exit(-2);
         }

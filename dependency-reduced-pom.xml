@@ -3,8 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>be.fedict.rdf</groupId>
   <artifactId>validator</artifactId>
-  <name>validator</name>
-  <version>1.0-SNAPSHOT</version>
+  <name>RDF Validator</name>
+  <version>1.1-SNAPSHOT</version>
+  <description>Command-line RDF validator with some built-in SPARQL rules for DCAT-AP</description>
   <build>
     <plugins>
       <plugin>
