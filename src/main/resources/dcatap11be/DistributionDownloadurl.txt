@@ -7,6 +7,6 @@ SELECT ?dist
 WHERE {
     ?dist a dcat:Distribution
     FILTER NOT EXISTS { 
-        ?dist dcat:downloadURL ?value
+        ?dist dcat:accessURL ?value
     }
 }

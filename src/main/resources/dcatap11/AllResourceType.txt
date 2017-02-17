@@ -14,5 +14,6 @@ WHERE {
         dcterms:license
         dcterms:publisher
         dcterms:rights
+	dcterms:temporal
     }
 }
