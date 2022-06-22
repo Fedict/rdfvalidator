@@ -74,7 +74,7 @@ public class Validator {
     private final SimpleResultWriter sw;
 
     private Repository repo;
-    
+    private FileSystem fs;
     
     /**
      * Get the first line comment of the query
@@ -119,7 +119,6 @@ public class Validator {
             throw new IOException(ex);
         }
         if (uri.getScheme().equals("jar")) {
-            FileSystem fs;
             try {
                 fs = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException f) {
@@ -143,15 +142,19 @@ public class Validator {
         Path pathdir = getPath(ruleset);
         
         if (Files.isDirectory(pathdir)) {
-            DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir);
-            for(Path file: stream) {
-                LOG.debug("Rule {}", file);
-                String rule = new String(Files.readAllBytes(file));
-                rules.add(rule);
-            }
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(pathdir)) {
+				for(Path file: stream) {
+					LOG.debug("Rule {}", file);
+					String rule = Files.readString(file);
+					rules.add(rule);
+				}
+			}
         } else {
             LOG.warn("Path {} is not a directory", pathdir);
         }
+		if (fs != null) {
+			fs.close();
+		}
         return rules;
     }
     
@@ -196,7 +199,9 @@ public class Validator {
         
         if (violations == 0) {
             sw.text("OK");
-        }
+        } else {
+			sw.text("Number of violations: " + violations);
+		}
         sw.endSection();
         
         return violations;
@@ -226,13 +231,13 @@ public class Validator {
             List<String> rules = readRules(ruleset);
         
             for(String rule: rules) {
-                LOG.debug("Validating {}", rule.replaceAll("\n", " "));
+                LOG.debug("Validating {}", rule.replace("\n", " "));
                 violations += validateRule(con, rule, sw);
             }
             sw.endSection();
         }
         
-        sw.text("Number of violations: " + violations);
+        sw.text("Total number of violations: " + violations);
 
         sw.end();
         

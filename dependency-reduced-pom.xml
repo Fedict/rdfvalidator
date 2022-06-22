@@ -4,13 +4,20 @@
   <groupId>be.fedict.rdf</groupId>
   <artifactId>validator</artifactId>
   <name>RDF Validator</name>
-  <version>1.3</version>
+  <version>1.4</version>
   <description>Command-line RDF validator with some built-in SPARQL rules for DCAT-AP</description>
+  <licenses>
+    <license>
+      <name>BSD-2-Clause</name>
+      <url>https://opensource.org/licenses/BSD-2-Clause</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.2</version>
         <configuration>
           <archive>
             <manifest>
@@ -22,7 +29,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.3</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -46,7 +53,6 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <rdf4j.version>3.5.1</rdf4j.version>
+    <rdf4j.version>4.0.2</rdf4j.version>
   </properties>
 </project>
-

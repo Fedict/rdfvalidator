@@ -37,8 +37,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Quick and dirty HTML writer
@@ -46,9 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Bart Hanssens <bart.hanssens@fedict.be>
  */
 public class HtmlWriter implements SimpleResultWriter {
-    private final static Logger LOG = LoggerFactory.getLogger(HtmlWriter.class);
-    
-    private final String sep;
+	private final String sep;
     private final Path path;
     private Writer out;
     
