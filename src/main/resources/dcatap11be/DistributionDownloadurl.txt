@@ -1,4 +1,4 @@
-# Distribution missing access URL
+# Distribution missing download URL
 
 PREFIX dcat:    <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -7,6 +7,6 @@ SELECT ?dist
 WHERE {
     ?dist a dcat:Distribution
     FILTER NOT EXISTS { 
-        ?dist dcat:accessURL ?value
+        ?dist dcat:downloadURL ?value
     }
 }
