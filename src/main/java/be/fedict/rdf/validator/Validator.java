@@ -256,8 +256,7 @@ public class Validator {
     public void init() throws IOException {
         LOG.debug("Initialize repository");
         repo = new SailRepository(new MemoryStore());
-        repo.initialize();
-        
+
         Optional<RDFFormat> fmt = Rio.getParserFormatForFileName(path.toString());
         if (!fmt.isPresent()) {
             throw new IOException("Could not determine file type");
