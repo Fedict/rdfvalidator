@@ -5,17 +5,26 @@
     <artifactId>validator</artifactId>
     <version>1.4</version>
     <packaging>jar</packaging>
+    <name>RDF Validator</name>
+    <description>Command-line RDF validator with some built-in SPARQL rules for DCAT-AP</description>
+	<licenses>
+		<license>
+			<name>BSD-2-Clause</name>
+			<url>https://opensource.org/licenses/BSD-2-Clause</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-	<rdf4j.version>4.0.2</rdf4j.version>
+		<rdf4j.version>4.0.2</rdf4j.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
-            <version>1.4</version>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -76,6 +85,4 @@
             </plugin>
         </plugins>
     </build>
-    <name>RDF Validator</name>
-    <description>Command-line RDF validator with some built-in SPARQL rules for DCAT-AP</description>
 </project>
